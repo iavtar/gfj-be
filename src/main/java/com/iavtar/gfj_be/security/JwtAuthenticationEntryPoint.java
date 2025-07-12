@@ -1,6 +1,7 @@
 package com.iavtar.gfj_be.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iavtar.gfj_be.model.response.ServiceResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,15 +33,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 .getWriter()
                 .print(
                         objectMapper.writeValueAsString(
-                                UnauthorizedResponse.builder().message("Invalid Credentials!").build()));
+                                ServiceResponse.builder().message("Invalid Credentials!").build()));
     }
-
-}
-
-@Builder
-@Data
-class UnauthorizedResponse {
-
-    private String message;
 
 }
