@@ -23,9 +23,6 @@ public class AgentController {
     @Autowired
     private AgentService agentService;
 
-    @Autowired
-    private CommonUtil commonUtil;
-
     @PostMapping("/user")
     public ResponseEntity<?> createClient(@RequestBody CreateClientRequest request) {
         try {
@@ -60,7 +57,6 @@ public class AgentController {
 
             ServiceResponse response = ServiceResponse.builder()
                     .message("Client created successfully")
-                    .data(createdClient)
                     .build();
 
             return ResponseEntity.ok(response);

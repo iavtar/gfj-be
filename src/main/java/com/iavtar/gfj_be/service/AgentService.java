@@ -63,9 +63,7 @@ public class AgentService {
         client.setGoldWastagePercentage(request.getGoldWastagePercentage());
         client.setProfitAndLabourPercentage(request.getProfitAndLabourPercentage());
         client.setCadCamWaxPrice(request.getCadCamWaxPrice());
-        client.setWebsite(request.getWebsite());
-        client.setBusinessType(request.getBusinessType());
-        client.setAgent(appUserRepository.findById(request.getAgentId()).orElse(null));
+        client.setAgentId(request.getAgentId());
         return client;
     }
 

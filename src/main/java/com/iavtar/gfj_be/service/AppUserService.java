@@ -43,12 +43,19 @@ public class AppUserService {
                     .orElseThrow(() -> new IllegalStateException("BUSINESS_ADMIN role not found in database"));
 
             Set<DashboardTab> businessAdminDashboardTabs = commonUtil.getDashboardTabsForBusinessAdmin();
-            AppUser savedUser = appUserRepository.save(commonUtil.addRoleAndDashboardTabs(
-                    AppUser.builder().username(username).firstName(firstName).lastName(lastName).password(passwordEncoder.encode(password))
-                            .email(email).phoneNumber(phoneNumber).isActive(true).roles(new HashSet<>()).dashboardTabs(new HashSet<>()).build(),
-                    businessAdminRole, businessAdminDashboardTabs));
+            AppUser savedUser = commonUtil.addRoleAndDashboardTabs(AppUser.builder()
+                    .username(username)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .password(passwordEncoder.encode(password))
+                    .email(email)
+                    .phoneNumber(phoneNumber)
+                    .isActive(true)
+                    .roles(new HashSet<>())
+                    .dashboardTabs(new HashSet<>())
+                    .build(), businessAdminRole, businessAdminDashboardTabs);
+            appUserRepository.save(savedUser);
             log.info("Successfully created business admin: {} with ID: {}", savedUser.getUsername(), savedUser.getId());
-
         } catch (Exception e) {
             log.error("Error creating business admin {}: {}", username, e.getMessage());
             throw e;

@@ -17,23 +17,19 @@ public class CreateClientRequest {
     private String     clientLocation;
     private String     businessLogoUrl;
     private String     email;
-    private String phoneNumber;
-    private String businessAddress;
-    private String shippingAddress;
-    private String city;
-    private String state;
-    private String country;
-    private String zipCode;
-    private String einNumber;
+    private String     phoneNumber;
+    private String     businessAddress;
+    private String     shippingAddress;
+    private String     city;
+    private String     state;
+    private String     country;
+    private String     zipCode;
+    private String     einNumber;
     private String     taxId;
     private BigDecimal diamondSettingPrice;
     private BigDecimal goldWastagePercentage;
     private BigDecimal profitAndLabourPercentage;
     private BigDecimal cadCamWaxPrice;
-    private String website;
-    private String businessType;
-    private String notes;
-    private String clientCode;
-    private Long agentId;
+    private Long       agentId;
 
 }

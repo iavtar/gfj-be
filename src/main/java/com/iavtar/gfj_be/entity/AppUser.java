@@ -1,14 +1,13 @@
 package com.iavtar.gfj_be.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -38,6 +37,7 @@ public class AppUser implements Serializable {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     private String phoneNumber;
 
     @Column(nullable = false)
@@ -80,10 +80,6 @@ public class AppUser implements Serializable {
             this.dashboardTabs.remove(tab);
         }
     }
-
-    @OneToMany(mappedBy = "agent", fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<Client> clients = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
