@@ -1,13 +1,20 @@
 package com.iavtar.gfj_be.utility;
 
 import com.iavtar.gfj_be.entity.AppUser;
+import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.entity.DashboardTab;
 import com.iavtar.gfj_be.entity.enums.DashboardTabs;
 import com.iavtar.gfj_be.entity.enums.RoleType;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.repository.AppUserRepository;
+import com.iavtar.gfj_be.repository.ClientRepository;
 import com.iavtar.gfj_be.repository.DashboardRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -23,6 +30,9 @@ public class CommonUtil {
     @Autowired
     private DashboardRepository dashboardRepository;
 
+    @Autowired
+    private ClientRepository clientRepository;
+
     public boolean existsByUsername(String username) {
         log.debug("Checking if username exists: {}", username);
         return appUserRepository.findByUsername(username).isPresent();
@@ -30,14 +40,12 @@ public class CommonUtil {
 
     public boolean existsByEmail(String email) {
         log.debug("Checking if email exists: {}", email);
-        return appUserRepository.findAll().stream()
-                .anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
+        return appUserRepository.findAll().stream().anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
     }
 
     public boolean existsByPhoneNumber(String phoneNumber) {
         log.debug("Checking if phone number exists: {}", phoneNumber);
-        return appUserRepository.findAll().stream()
-                .anyMatch(user -> user.getPhoneNumber().equalsIgnoreCase(phoneNumber));
+        return appUserRepository.findAll().stream().anyMatch(user -> user.getPhoneNumber().equalsIgnoreCase(phoneNumber));
     }
 
     public Optional<AppUser> findByUsername(String username) {
@@ -47,9 +55,7 @@ public class CommonUtil {
 
     public Optional<AppUser> findByEmail(String email) {
         log.debug("Finding user by email: {}", email);
-        return appUserRepository.findAll().stream()
-                .filter(user -> user.getEmail().equalsIgnoreCase(email))
-                .findFirst();
+        return appUserRepository.findAll().stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
     }
 
     public Set<DashboardTab> getDashboardTabs(List<DashboardTabs> requiredTabs, String roleName) {
@@ -72,30 +78,18 @@ public class CommonUtil {
     }
 
     public Set<DashboardTab> getDashboardTabsForAgent() {
-        List<DashboardTabs> requiredTabs = Arrays.asList(
-                DashboardTabs.CLIENT_ADMINISTRATION,
-                DashboardTabs.CALCULATOR,
-                DashboardTabs.QUOTATION
-        );
+        List<DashboardTabs> requiredTabs = Arrays.asList(DashboardTabs.CLIENT_ADMINISTRATION, DashboardTabs.CALCULATOR, DashboardTabs.QUOTATION);
         return getDashboardTabs(requiredTabs, "agent");
     }
 
     public Set<DashboardTab> getDashboardTabsForBusinessAdmin() {
-        List<DashboardTabs> requiredTabs = Arrays.asList(
-                DashboardTabs.AGENT_ADMINISTRATION,
-                DashboardTabs.CLIENT_ADMINISTRATION,
-                DashboardTabs.CALCULATOR,
-                DashboardTabs.LEDGER,
-                DashboardTabs.SHIPPING,
-                DashboardTabs.ANALYTICS,
-                DashboardTabs.QUOTATION
-        );
+        List<DashboardTabs> requiredTabs = Arrays.asList(DashboardTabs.AGENT_ADMINISTRATION, DashboardTabs.CLIENT_ADMINISTRATION,
+                DashboardTabs.CALCULATOR, DashboardTabs.LEDGER, DashboardTabs.SHIPPING, DashboardTabs.ANALYTICS, DashboardTabs.QUOTATION);
         return getDashboardTabs(requiredTabs, "business admin");
     }
 
     public AppUser addRoleAndDashboardTabs(AppUser user, com.iavtar.gfj_be.entity.Role role, Set<DashboardTab> dashboardTabs) {
-        log.debug("Adding role {} and {} dashboard tabs to user: {}",
-                role.getName(), dashboardTabs.size(), user.getUsername());
+        log.debug("Adding role {} and {} dashboard tabs to user: {}", role.getName(), dashboardTabs.size(), user.getUsername());
 
         user.addRole(role);
 
@@ -109,23 +103,76 @@ public class CommonUtil {
 
     public List<AppUser> findUsersByRole(RoleType roleType) {
         log.debug("Finding users by role: {}", roleType);
-        return appUserRepository.findAll().stream()
-                .filter(user -> user.getRoles().stream()
-                        .anyMatch(role -> role.getName().equals(roleType)))
+        return appUserRepository.findAll().stream().filter(user -> user.getRoles().stream().anyMatch(role -> role.getName().equals(roleType)))
                 .collect(Collectors.toList());
     }
 
-    public List<AppUser> findBusinessAdmins() {
-        log.debug("Finding all business admins");
-        List<AppUser> businessAdmins = findUsersByRole(RoleType.BUSINESS_ADMIN);
-        log.info("Found {} business admins", businessAdmins.size());
-        return businessAdmins;
+    public PagedUserResponse<AppUser> findBusinessAdmins(int offset, int size, String sortBy) {
+        log.debug("Finding business admins with offset: offset={}, size={}, sortBy={}", offset, size, sortBy);
+
+        int page = offset / size;
+
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<AppUser> userPage = appUserRepository.findByRoles_Name(RoleType.BUSINESS_ADMIN, pageable);
+
+        log.info("Found {} business admins at offset {} with {} total records", userPage.getNumberOfElements(), offset, userPage.getTotalElements());
+
+        return PagedUserResponse.from(userPage, offset, size);
     }
 
-    public List<AppUser> findAgents() {
-        log.debug("Finding all agents");
-        List<AppUser> agents = findUsersByRole(RoleType.AGENT);
-        log.info("Found {} agents", agents.size());
-        return agents;
+    public PagedUserResponse<AppUser> findAgents(int offset, int size, String sortBy) {
+        log.debug("Finding agents with offset: offset={}, size={}, sortBy={}", offset, size, sortBy);
+
+        int page = offset / size;
+
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<AppUser> agentPage = appUserRepository.findByRoles_Name(RoleType.AGENT, pageable);
+
+        log.info("Found {} agents at offset {} with {} total records", agentPage.getNumberOfElements(), offset, agentPage.getTotalElements());
+
+        return PagedUserResponse.from(agentPage, offset, size);
     }
+
+    public Client findClientByName(String clientName) {
+        log.debug("Finding client by name: {}", clientName);
+        return clientRepository.findByClientName(clientName).orElse(null);
+    }
+
+    public PagedUserResponse<Client> findAllClients(int offset, int size, String sortBy) {
+        log.debug("Finding all clients with offset: offset={}, size={}, sortBy={}", offset, size, sortBy);
+
+        int page = offset / size;
+
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Client> clientPage = clientRepository.findAll(pageable);
+
+        log.info("Found {} clients at offset {} with {} total records",
+                clientPage.getNumberOfElements(), offset, clientPage.getTotalElements());
+
+        return PagedUserResponse.from(clientPage, offset, size);
+    }
+
+    public PagedUserResponse<Client> findClientsByAgent(Long agentId, int offset, int size, String sortBy) {
+        log.debug("Finding clients for agent {} with offset: offset={}, size={}, sortBy={}",
+                agentId, offset, size, sortBy);
+
+        int page = offset / size;
+
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Client> clientPage = clientRepository.findByAgentId(agentId, pageable);
+
+        log.info("Found {} clients for agent {} at offset {} with {} total records",
+                clientPage.getNumberOfElements(), agentId, offset, clientPage.getTotalElements());
+
+        return PagedUserResponse.from(clientPage, offset, size);
+    }
+
 }

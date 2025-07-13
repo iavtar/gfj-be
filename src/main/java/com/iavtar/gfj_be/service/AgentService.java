@@ -2,8 +2,10 @@ package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.model.request.CreateClientRequest;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.repository.AppUserRepository;
 import com.iavtar.gfj_be.repository.ClientRepository;
+import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ public class AgentService {
     @Autowired
     private AppUserRepository appUserRepository;
 
+    @Autowired
+    private CommonUtil commonUtil;
 
     public boolean existsByClientName(String clientName) {
         return clientRepository.existsByClientName(clientName);
@@ -34,16 +38,47 @@ public class AgentService {
     public Client createClient(CreateClientRequest request) {
         log.info("Agent creating client: {}", request.getClientName());
 
-        // Convert DTO to Entity
-        Client client = convertToEntity(request);
+        Client savedClient = clientRepository.save(Client.builder()
+                .clientName(request.getClientName())
+                .businessLogoUrl(request.getBusinessLogoUrl())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .businessAddress(request.getBusinessAddress())
+                .shippingAddress(request.getShippingAddress())
+                .city(request.getCity())
+                .state(request.getState())
+                .country(request.getCountry())
+                .zipCode(request.getZipCode())
+                .einNumber(request.getEinNumber())
+                .taxId(request.getTaxId())
+                .diamondSettingPrice(request.getDiamondSettingPrice())
+                .goldWastagePercentage(request.getGoldWastagePercentage())
+                .profitAndLabourPercentage(request.getProfitAndLabourPercentage())
+                .cadCamWaxPrice(request.getCadCamWaxPrice())
+                .agentId(request.getAgentId())
+                .build());
 
-        // Save the client
-        Client savedClient = clientRepository.save(client);
-
-        log.info("Client created successfully with ID: {} by agent: {}", savedClient.getId(), request.getClientName());
+        log.info("Client created successfully with ID: {} by agent: {}",
+                savedClient.getId(), request.getAgentId());
 
         return savedClient;
     }
+
+    public Client getClientByName(String clientName) {
+        log.info("Getting client by name: {}", clientName);
+        return commonUtil.findClientByName(clientName);
+    }
+
+    public PagedUserResponse<Client> getAllClients(int offset, int size, String sortBy) {
+        log.info("Getting all clients with pagination");
+        return commonUtil.findAllClients(offset, size, sortBy);
+    }
+
+    public PagedUserResponse<Client> getClientsByAgent(Long agentId, int offset, int size, String sortBy) {
+        log.info("Getting clients for agent: {}", agentId);
+        return commonUtil.findClientsByAgent(agentId, offset, size, sortBy);
+    }
+
 
     private Client convertToEntity(CreateClientRequest request) {
         Client client = new Client();
@@ -66,5 +101,4 @@ public class AgentService {
         client.setAgentId(request.getAgentId());
         return client;
     }
-
 }

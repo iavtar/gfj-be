@@ -31,29 +31,33 @@ public class AppUser implements Serializable {
     private String firstName;
     private String lastName;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @JsonIgnore
+    @Column(unique = true, nullable = false)
     private String phoneNumber;
 
     @Column(nullable = false)
     private Boolean isActive = true;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "user_dashboard_tabs", // Keep your existing table name
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "dashboard_tab_id", referencedColumnName = "id"))
     @Builder.Default
     private Set<DashboardTab> dashboardTabs = new HashSet<>();
 
+    @JsonIgnore
     @CreationTimestamp
     private LocalDateTime createdAt;
 

@@ -2,6 +2,7 @@ package com.iavtar.gfj_be.controller;
 
 import com.iavtar.gfj_be.entity.AppUser;
 import com.iavtar.gfj_be.model.request.CreateUserRequest;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.service.AppUserService;
 import com.iavtar.gfj_be.service.BussinessAdminService;
@@ -76,13 +77,18 @@ public class BusinessAdminController {
         }
     }
 
-    @GetMapping("/getAllUser")
-    public ResponseEntity<?> getAllAgent() {
+    @GetMapping("/getAllAgent")
+    public ResponseEntity<?> getAllAgent(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy) {
         try {
-            List<AppUser> allUsers = bussinessAdminService.getAgents();
-            return ResponseEntity.ok(allUsers);
-        } catch (Exception e){
-            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all Agents").build();
+            PagedUserResponse<AppUser> response = bussinessAdminService.getAgents(offset, size, sortBy);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error getting all Agents")
+                    .build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }

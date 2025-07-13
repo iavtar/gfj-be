@@ -2,17 +2,14 @@ package com.iavtar.gfj_be.controller;
 
 import com.iavtar.gfj_be.entity.AppUser;
 import com.iavtar.gfj_be.model.request.CreateUserRequest;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
-import com.iavtar.gfj_be.model.response.UserResponse;
 import com.iavtar.gfj_be.service.AppUserService;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -50,8 +47,8 @@ public class SystemAdministrationController {
             }
 
             // Create the business admin user
-            appUserService.createBusinessAdmin(request.getUsername(), request.getFirstName(), request.getLastName(),
-                    request.getPassword(), request.getEmail(), request.getPhoneNumber());
+            appUserService.createBusinessAdmin(request.getUsername(), request.getFirstName(), request.getLastName(), request.getPassword(),
+                    request.getEmail(), request.getPhoneNumber());
 
             ServiceResponse response = ServiceResponse.builder().message("Business Admin Created Successfully").build();
 
@@ -65,26 +62,22 @@ public class SystemAdministrationController {
 
     @GetMapping("/getUser")
     public ResponseEntity<?> getUser(@RequestParam("username") String username) {
-        try{
+        try {
             AppUser appUser = appUserService.getBusinessAdmin(username);
-            UserResponse userResponse = UserResponse.builder().id(appUser.getId()).username(appUser.getUsername()).firstName(appUser.getFirstName()).lastName(appUser.getLastName()).email(appUser.getEmail()).phoneNumber(appUser.getPhoneNumber()).build();
             return ResponseEntity.ok(appUser);
-        } catch (Exception e){
+        } catch (Exception e) {
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting : " + username).build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
     @GetMapping("/getAllUser")
-    public ResponseEntity<?> getAllUser() {
+    public ResponseEntity<?> getAllUser(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy) {
         try {
-            List<AppUser> allUsers = appUserService.getBusinessAdmins();
-            List<UserResponse>userResponses = new ArrayList<>();
-            for(AppUser appUser : allUsers){
-                userResponses.add(UserResponse.builder().id(appUser.getId()).username(appUser.getUsername()).firstName(appUser.getFirstName()).lastName(appUser.getLastName()).email(appUser.getEmail()).phoneNumber(appUser.getPhoneNumber()).build());
-            }
-            return ResponseEntity.ok(userResponses);
-        } catch (Exception e){
+            PagedUserResponse<AppUser> response = appUserService.getBusinessAdmins(offset, size, sortBy);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all BusinessAdmin").build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }

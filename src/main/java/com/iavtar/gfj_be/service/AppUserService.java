@@ -5,6 +5,7 @@ import com.iavtar.gfj_be.entity.DashboardTab;
 import com.iavtar.gfj_be.entity.Role;
 import com.iavtar.gfj_be.entity.enums.DashboardTabs;
 import com.iavtar.gfj_be.entity.enums.RoleType;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.repository.AppUserRepository;
 import com.iavtar.gfj_be.repository.DashboardRepository;
 import com.iavtar.gfj_be.repository.RoleRepository;
@@ -43,17 +44,10 @@ public class AppUserService {
                     .orElseThrow(() -> new IllegalStateException("BUSINESS_ADMIN role not found in database"));
 
             Set<DashboardTab> businessAdminDashboardTabs = commonUtil.getDashboardTabsForBusinessAdmin();
-            AppUser savedUser = commonUtil.addRoleAndDashboardTabs(AppUser.builder()
-                    .username(username)
-                    .firstName(firstName)
-                    .lastName(lastName)
-                    .password(passwordEncoder.encode(password))
-                    .email(email)
-                    .phoneNumber(phoneNumber)
-                    .isActive(true)
-                    .roles(new HashSet<>())
-                    .dashboardTabs(new HashSet<>())
-                    .build(), businessAdminRole, businessAdminDashboardTabs);
+            AppUser savedUser = commonUtil.addRoleAndDashboardTabs(
+                    AppUser.builder().username(username).firstName(firstName).lastName(lastName).password(passwordEncoder.encode(password))
+                            .email(email).phoneNumber(phoneNumber).isActive(true).roles(new HashSet<>()).dashboardTabs(new HashSet<>()).build(),
+                    businessAdminRole, businessAdminDashboardTabs);
             appUserRepository.save(savedUser);
             log.info("Successfully created business admin: {} with ID: {}", savedUser.getUsername(), savedUser.getId());
         } catch (Exception e) {
@@ -66,8 +60,8 @@ public class AppUserService {
         return commonUtil.findByUsername(username).orElse(null);
     }
 
-    public List<AppUser> getBusinessAdmins() {
-        return commonUtil.findBusinessAdmins();
+    public PagedUserResponse<AppUser> getBusinessAdmins(int offset, int size, String sortBy) {
+        return commonUtil.findBusinessAdmins(offset, size, sortBy);
     }
 
     @Transactional

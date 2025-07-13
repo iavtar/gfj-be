@@ -4,6 +4,7 @@ import com.iavtar.gfj_be.entity.AppUser;
 import com.iavtar.gfj_be.entity.DashboardTab;
 import com.iavtar.gfj_be.entity.Role;
 import com.iavtar.gfj_be.entity.enums.RoleType;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.repository.AppUserRepository;
 import com.iavtar.gfj_be.repository.RoleRepository;
 import com.iavtar.gfj_be.utility.CommonUtil;
@@ -35,24 +36,16 @@ public class BussinessAdminService {
     public void createAgent(String username, String firstName, String lastName, String password, String email, String phoneNumber) {
         try {
 
-            Role agentRole = roleRepository.findByName(RoleType.AGENT)
-                    .orElseThrow(() -> {
-                        log.error("AGENT role not found in database");
-                        return new IllegalStateException("AGENT role not found in database");
-                    });
+            Role agentRole = roleRepository.findByName(RoleType.AGENT).orElseThrow(() -> {
+                log.error("AGENT role not found in database");
+                return new IllegalStateException("AGENT role not found in database");
+            });
 
             Set<DashboardTab> agentDashboardTabs = commonUtil.getDashboardTabsForAgent();
-            AppUser savedUser = appUserRepository.save(commonUtil.addRoleAndDashboardTabs(AppUser.builder()
-                    .username(username)
-                    .firstName(firstName)
-                    .lastName(lastName)
-                    .password(passwordEncoder.encode(password))
-                    .email(email)
-                    .phoneNumber(phoneNumber)
-                    .isActive(true)
-                    .roles(new HashSet<>())
-                    .dashboardTabs(new HashSet<>())
-                    .build(), agentRole, agentDashboardTabs));
+            AppUser savedUser = appUserRepository.save(commonUtil.addRoleAndDashboardTabs(
+                    AppUser.builder().username(username).firstName(firstName).lastName(lastName).password(passwordEncoder.encode(password))
+                            .email(email).phoneNumber(phoneNumber).isActive(true).roles(new HashSet<>()).dashboardTabs(new HashSet<>()).build(),
+                    agentRole, agentDashboardTabs));
 
             log.info("Successfully created agent: {} with ID: {}", savedUser.getUsername(), savedUser.getId());
 
@@ -69,7 +62,7 @@ public class BussinessAdminService {
         return commonUtil.findByUsername(username).orElse(null);
     }
 
-    public List<AppUser> getAgents() {
-        return commonUtil.findAgents();
+    public PagedUserResponse<AppUser> getAgents(int offset, int size, String sortBy) {
+        return commonUtil.findAgents(offset, size, sortBy);
     }
 }
