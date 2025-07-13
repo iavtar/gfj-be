@@ -1,0 +1,67 @@
+package com.iavtar.gfj_be.service;
+
+import com.iavtar.gfj_be.entity.AppUser;
+import com.iavtar.gfj_be.entity.DashboardTab;
+import com.iavtar.gfj_be.entity.Role;
+import com.iavtar.gfj_be.entity.enums.RoleType;
+import com.iavtar.gfj_be.repository.AppUserRepository;
+import com.iavtar.gfj_be.repository.RoleRepository;
+import com.iavtar.gfj_be.utility.CommonUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+
+@Service
+@Slf4j
+public class BussinessAdminService {
+
+    @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private CommonUtil commonUtil;
+
+    @Transactional
+    public void createAgent(String username, String firstName, String lastName, String password, String email, String phoneNumber) {
+        try {
+
+            Role agentRole = roleRepository.findByName(RoleType.AGENT).orElseThrow(() -> {
+                log.error("AGENT role not found in database");
+                return new IllegalStateException("AGENT role not found in database");
+            });
+
+            Set<DashboardTab> agentDashboardTabs = commonUtil.getDashboardTabsForAgent();
+            AppUser savedUser = appUserRepository.save(commonUtil.addRoleAndDashboardTabs(
+                    AppUser.builder().username(username).firstName(firstName).lastName(lastName).password(passwordEncoder.encode(password))
+                            .email(email).phoneNumber(phoneNumber).isActive(true).roles(new HashSet<>()).dashboardTabs(new HashSet<>()).build(),
+                    agentRole, agentDashboardTabs));
+
+            log.info("Successfully created agent: {} with ID: {}", savedUser.getUsername(), savedUser.getId());
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.error("Business logic error creating agent {}: {}", username, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error creating agent {}: {}", username, e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public AppUser getAgent(String username) {
+        return commonUtil.findByUsername(username).orElse(null);
+    }
+
+    public List<AppUser> getAgents() {
+        return commonUtil.findAgents();
+    }
+}

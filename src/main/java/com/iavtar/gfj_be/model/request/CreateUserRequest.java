@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateBusinessAdminRequest {
+public class CreateUserRequest {
     private String username;
     private String firstName;
     private String lastName;

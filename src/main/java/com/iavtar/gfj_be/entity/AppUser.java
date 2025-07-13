@@ -6,7 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -78,6 +80,10 @@ public class AppUser implements Serializable {
             this.dashboardTabs.remove(tab);
         }
     }
+
+    @OneToMany(mappedBy = "agent", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Client> clients = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

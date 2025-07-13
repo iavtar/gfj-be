@@ -4,6 +4,7 @@ import com.iavtar.gfj_be.entity.AppUser;
 import com.iavtar.gfj_be.model.request.CreateUserRequest;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.service.AppUserService;
+import com.iavtar.gfj_be.service.BussinessAdminService;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,11 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/systemAdministration")
-public class SystemAdministrationController {
+@RequestMapping("/api/businessAdmin")
+public class BusinessAdminController {
+
+    @Autowired
+    private BussinessAdminService bussinessAdminService;
 
     @Autowired
     private AppUserService appUserService;
@@ -24,10 +28,10 @@ public class SystemAdministrationController {
     private CommonUtil commonUtil;
 
     @PostMapping("/user")
-    public ResponseEntity<?> createBusinessAdmin(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<?> createAgent(@RequestBody CreateUserRequest request) {
         try {
 
-            log.info("Creating new business admin with username: {}", request.getUsername());
+            log.info("Creating new agent with username: {}", request.getUsername());
 
             if (commonUtil.existsByUsername(request.getUsername())) {
                 log.error("Validation failed - username already exists: {}", request.getUsername());
@@ -48,37 +52,73 @@ public class SystemAdministrationController {
             }
 
             // Create the business admin user
-            appUserService.createBusinessAdmin(request.getUsername(), request.getFirstName(), request.getLastName(),
+            bussinessAdminService.createAgent(request.getUsername(), request.getFirstName(), request.getLastName(),
                     request.getPassword(), request.getEmail(), request.getPhoneNumber());
 
-            ServiceResponse response = ServiceResponse.builder().message("Business Admin Created Successfully").build();
+            ServiceResponse response = ServiceResponse.builder().message("Agent Created Successfully").build();
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating business admin: ").build();
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating Agent: ").build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
     @GetMapping("/getUser")
-    public ResponseEntity<?> getUser(@RequestParam("username") String username) {
+    public ResponseEntity<?> getAgent(@RequestParam("username") String username) {
         try{
-            AppUser appUser = appUserService.getBusinessAdmin(username);
+            AppUser appUser = bussinessAdminService.getAgent(username);
             return ResponseEntity.ok(appUser);
         } catch (Exception e){
-            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting : " + username).build();
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting Agent: " + username).build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
     @GetMapping("/getAllUser")
-    public ResponseEntity<?> getAllUser() {
+    public ResponseEntity<?> getAllAgent() {
         try {
-            List<AppUser> allUsers = appUserService.getBusinessAdmins();
+            List<AppUser> allUsers = bussinessAdminService.getAgents();
             return ResponseEntity.ok(allUsers);
         } catch (Exception e){
-            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all BusinessAdmin").build();
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all Agents").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/blockUser")
+    public ResponseEntity<?> blockUser(@RequestParam("username") String username) {
+        try {
+            appUserService.blockUser(username);
+
+            ServiceResponse response = ServiceResponse.builder()
+                    .message("User blocked successfully")
+                    .build();
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error blocking user: " + e.getMessage())
+                    .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/unblockUser")
+    public ResponseEntity<?> unblockUser(@RequestParam("username") String username) {
+        try {
+            appUserService.unblockUser(username);
+
+            ServiceResponse response = ServiceResponse.builder()
+                    .message("User unblocked successfully")
+                    .build();
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error unblocking user: " + e.getMessage())
+                    .build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }

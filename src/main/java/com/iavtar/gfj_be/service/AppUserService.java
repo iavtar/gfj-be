@@ -8,6 +8,8 @@ import com.iavtar.gfj_be.entity.enums.RoleType;
 import com.iavtar.gfj_be.repository.AppUserRepository;
 import com.iavtar.gfj_be.repository.DashboardRepository;
 import com.iavtar.gfj_be.repository.RoleRepository;
+import com.iavtar.gfj_be.utility.CommonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
+@Slf4j
 public class AppUserService {
 
     @Autowired
@@ -30,87 +33,59 @@ public class AppUserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public boolean existsByUsername(String username) {
-        return appUserRepository.findByUsername(username).isPresent();
-    }
-
-    public boolean existsByEmail(String email) {
-        return appUserRepository.findAll().stream().anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
-    }
-
-    public boolean existsByPhoneNumber(String phoneNumber) {
-        return appUserRepository.findAll().stream().anyMatch(user -> user.getPhoneNumber().equalsIgnoreCase(phoneNumber));
-    }
-
-    public Optional<AppUser> findByUsername(String username) {
-        return appUserRepository.findByUsername(username);
-    }
-
-    public Optional<AppUser> findByEmail(String email) {
-        return appUserRepository.findAll().stream().filter(user -> user.getEmail().equalsIgnoreCase(email)).findFirst();
-    }
+    @Autowired
+    private CommonUtil commonUtil;
 
     @Transactional
-    public AppUser createBusinessAdmin(String username, String firstName, String lastName, String password, String email, String phoneNumber) {
+    public void createBusinessAdmin(String username, String firstName, String lastName, String password, String email, String phoneNumber) {
         try {
-
-            if (existsByUsername(username)) {
-                throw new IllegalArgumentException("User with username already exists: " + username);
-            }
-
-            if (existsByEmail(email)) {
-                throw new IllegalArgumentException("User with email already exists: " + email);
-            }
-
-            if (existsByPhoneNumber(phoneNumber)) {
-                throw new IllegalArgumentException("Phone number already exists: " + phoneNumber);
-            }
-
             Role businessAdminRole = roleRepository.findByName(RoleType.BUSINESS_ADMIN)
                     .orElseThrow(() -> new IllegalStateException("BUSINESS_ADMIN role not found in database"));
 
-            Set<DashboardTab> businessAdminDashboardTabs = getDashboardTabsForBusinessAdmin();
-
-            AppUser businessAdmin = AppUser.builder().username(username).firstName(firstName).lastName(lastName)
-                    .password(passwordEncoder.encode(password)).email(email).phoneNumber(phoneNumber).isActive(true).roles(new HashSet<>())
-                    .dashboardTabs(new HashSet<>()).build();
-
-            businessAdmin.addRole(businessAdminRole);
-
-            for (DashboardTab tab : businessAdminDashboardTabs) {
-                businessAdmin.addDashboardTab(tab);
-            }
-
-            AppUser savedUser = appUserRepository.save(businessAdmin);
-            System.out.println("Successfully created business admin: " + savedUser.getUsername());
-            return savedUser;
+            Set<DashboardTab> businessAdminDashboardTabs = commonUtil.getDashboardTabsForBusinessAdmin();
+            AppUser savedUser = appUserRepository.save(commonUtil.addRoleAndDashboardTabs(
+                    AppUser.builder().username(username).firstName(firstName).lastName(lastName).password(passwordEncoder.encode(password))
+                            .email(email).phoneNumber(phoneNumber).isActive(true).roles(new HashSet<>()).dashboardTabs(new HashSet<>()).build(),
+                    businessAdminRole, businessAdminDashboardTabs));
+            log.info("Successfully created business admin: {} with ID: {}", savedUser.getUsername(), savedUser.getId());
 
         } catch (Exception e) {
-            System.err.println("Error creating Business Admin: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error creating business admin {}: {}", username, e.getMessage());
             throw e;
         }
     }
 
-    private Set<DashboardTab> getDashboardTabsForBusinessAdmin() {
-        Set<DashboardTab> tabs = new HashSet<>();
-
-        List<DashboardTabs> requiredTabs = Arrays.asList(DashboardTabs.AGENT_ADMINISTRATION, DashboardTabs.CLIENT_ADMINISTRATION,
-                DashboardTabs.CALCULATOR, DashboardTabs.LEDGER, DashboardTabs.SHIPPING, DashboardTabs.ANALYTICS, DashboardTabs.QUOTATION);
-
-        for (DashboardTabs tabName : requiredTabs) {
-            Optional<DashboardTab> tabOptional = dashboardRepository.findByName(tabName);
-            if (tabOptional.isPresent()) {
-                tabs.add(tabOptional.get());
-            } else {
-                System.err.println("Warning: Dashboard tab not found: " + tabName);
-            }
-        }
-
-        return tabs;
+    public AppUser getBusinessAdmin(String username) {
+        return commonUtil.findByUsername(username).orElse(null);
     }
 
-    public AppUser save(AppUser user) {
-        return appUserRepository.save(user);
+    public List<AppUser> getBusinessAdmins() {
+        return commonUtil.findBusinessAdmins();
+    }
+
+    @Transactional
+    public void blockUser(String username) {
+        AppUser user = appUserRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
+
+        if (!user.getIsActive()) {
+            throw new IllegalStateException("User is already blocked");
+        }
+
+        user.setIsActive(false);
+        appUserRepository.save(user);
+    }
+
+    @Transactional
+    public void unblockUser(String username) {
+        AppUser user = appUserRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
+
+        if (user.getIsActive()) {
+            throw new IllegalStateException("User is already active");
+        }
+
+        user.setIsActive(true);
+        appUserRepository.save(user);
     }
 }
