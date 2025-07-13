@@ -22,19 +22,15 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
         try {
-            httpSecurity
-                    .csrf(csrf -> csrf.disable())
-                    .exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint))
-                    .sessionManagement(
-                            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .authorizeHttpRequests(
-                            authorize ->
-                                    authorize.requestMatchers(("/api/auth/**")).permitAll().anyRequest().authenticated())
+            httpSecurity.csrf(csrf -> csrf.disable()).exceptionHandling(handler -> handler.authenticationEntryPoint(authenticationEntryPoint))
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .authorizeHttpRequests(authorize -> authorize.requestMatchers(("/api/auth/**")).permitAll().anyRequest().authenticated())
                     .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
             return httpSecurity.build();
         } catch (Exception exception) {

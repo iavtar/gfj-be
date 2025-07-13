@@ -37,7 +37,8 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public boolean isValidToken(String token) {
         try {
-            Jwts.parser().setSigningKey(SecurityConstant.JWT_SECRET).parseClaimsJws(token).getBody();
+            Key key = Keys.hmacShaKeyFor(SecurityConstant.JWT_SECRET.getBytes());
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (SignatureException ex) {
             log.error("Invalid JWT Signature");
@@ -55,9 +56,9 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String getUsername(String token) {
-        Claims claims = Jwts.parser().setSigningKey(SecurityConstant.JWT_SECRET).parseClaimsJws(token).getBody();
-        String username = (String) claims.get("username");
-        return username;
+        Key key = Keys.hmacShaKeyFor(SecurityConstant.JWT_SECRET.getBytes());
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        return (String) claims.get("username");
     }
 
     @Override
@@ -68,12 +69,7 @@ public class JwtServiceImpl implements JwtService {
         claims.put("username", appUser.get().getUsername());
         claims.put("roles", appUser.get().getRoles());
         Key key = Keys.hmacShaKeyFor(SecurityConstant.JWT_SECRET.getBytes());
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
+        return Jwts.builder().setClaims(claims).setIssuedAt(new Date()).setExpiration(expiryDate).signWith(key, SignatureAlgorithm.HS512).compact();
     }
 
 }

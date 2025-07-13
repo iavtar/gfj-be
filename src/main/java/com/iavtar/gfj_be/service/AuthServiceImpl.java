@@ -1,8 +1,9 @@
 package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.AppUser;
-import com.iavtar.gfj_be.entity.Dashboard;
+import com.iavtar.gfj_be.entity.DashboardTab;
 import com.iavtar.gfj_be.entity.Role;
+import com.iavtar.gfj_be.entity.enums.DashboardTabs;
 import com.iavtar.gfj_be.model.request.SignInRequest;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.model.response.SignInResponse;
@@ -35,38 +36,27 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<?> signIn(SignInRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             if (authentication.isAuthenticated()) {
                 Optional<AppUser> appUser = userRepository.findByUsername(request.getUsername());
                 if (appUser.get().getIsActive()) {
                     Set<String> userRoles = new HashSet<>();
-                    for(Role role : appUser.get().getRoles()) {
+                    for (Role role : appUser.get().getRoles()) {
                         userRoles.add(role.getName().getValue());
                     }
                     Set<String> userDashboards = new HashSet<>();
-                    for(Dashboard dashboard : appUser.get().getDashboards()) {
+                    for (DashboardTab dashboard : appUser.get().getDashboardTabs()) {
                         userDashboards.add(dashboard.getName().getValue());
                     }
-                    return new ResponseEntity<>(SignInResponse.builder()
-                            .id(appUser.get().getId())
-                            .username(appUser.get().getUsername())
-                            .name(appUser.get().getFirstName() + " " + appUser.get().getLastName())
-                            .email(appUser.get().getEmail())
-                            .phoneNumber(appUser.get().getCountryCode() + "-" + appUser.get().getPhoneNumber())
-                            .roles(userRoles)
-                            .dashboards(userDashboards)
-                            .token(jwtService.generateToken(appUser))
-                            .build(), HttpStatus.OK);
+                    return new ResponseEntity<>(SignInResponse.builder().id(appUser.get().getId()).username(appUser.get().getUsername())
+                            .name(appUser.get().getFirstName() + " " + appUser.get().getLastName()).email(appUser.get().getEmail())
+                            .phoneNumber(appUser.get().getPhoneNumber()).roles(userRoles).dashboardTabs(userDashboards)
+                            .token(jwtService.generateToken(appUser)).build(), HttpStatus.OK);
                 } else {
-                    return new ResponseEntity<>(ServiceResponse.builder()
-                            .message("Account Locked Please Contact Admin!")
-                            .build(), HttpStatus.OK);
+                    return new ResponseEntity<>(ServiceResponse.builder().message("Account Locked Please Contact Admin!").build(), HttpStatus.OK);
                 }
             } else {
-                return new ResponseEntity<>(ServiceResponse.builder()
-                        .message("Invalid Credentials!")
-                        .build(), HttpStatus.OK);
+                return new ResponseEntity<>(ServiceResponse.builder().message("Invalid Credentials!").build(), HttpStatus.OK);
             }
         } catch (Exception exception) {
             throw new RuntimeException(exception.getMessage());

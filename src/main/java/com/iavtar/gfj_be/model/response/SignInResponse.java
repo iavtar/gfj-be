@@ -1,7 +1,5 @@
 package com.iavtar.gfj_be.model.response;
 
-import com.iavtar.gfj_be.entity.Dashboard;
-import com.iavtar.gfj_be.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +23,7 @@ public class SignInResponse {
 
     private Set<String> roles;
 
-    private Set<String> dashboards;
+    private Set<String> dashboardTabs;
 
     private String token;
 

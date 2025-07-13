@@ -1,9 +1,9 @@
 package com.iavtar.gfj_be.bootstrapper;
 
 import com.iavtar.gfj_be.entity.AppUser;
-import com.iavtar.gfj_be.entity.Dashboard;
+import com.iavtar.gfj_be.entity.DashboardTab;
 import com.iavtar.gfj_be.entity.Role;
-import com.iavtar.gfj_be.entity.enums.DashboardTypes;
+import com.iavtar.gfj_be.entity.enums.DashboardTabs;
 import com.iavtar.gfj_be.entity.enums.RoleType;
 import com.iavtar.gfj_be.repository.AppUserRepository;
 import com.iavtar.gfj_be.repository.DashboardRepository;
@@ -44,35 +44,24 @@ public class SystemBootstrapper implements CommandLineRunner {
             }
         }
         //Deploy All Dashboards
-        for(DashboardTypes dashboardType : DashboardTypes.values()) {
-            Optional<Dashboard> dashboard = dashboardRepository.findByName(dashboardType);
-            if(dashboard.isEmpty()) {
-                dashboardRepository.save(Dashboard.builder().name(dashboardType).build());
+        for (DashboardTabs dashboardTabs : DashboardTabs.values()) {
+            Optional<DashboardTab> dashboardTab = dashboardRepository.findByName(dashboardTabs);
+            if (dashboardTab.isEmpty()) {
+                dashboardRepository.save(DashboardTab.builder().name(dashboardTabs).build());
             }
         }
         //Create System Super Admin
         Optional<AppUser> user = userRepository.findByUsername("iavtar");
-        if(user.isEmpty()) {
+        if (user.isEmpty()) {
             Optional<Role> superAdminRole = roleRepository.findByName(RoleType.SUPER_ADMIN);
             Set<Role> superAdminRoles = new HashSet<>();
             superAdminRoles.add(superAdminRole.get());
-            Optional<Dashboard> superAdminDashboard = dashboardRepository.findByName(DashboardTypes.SUPER_ADMIN_DASHBOARD);
-            Set<Dashboard> superAdminDashboards = new HashSet<>();
-            superAdminDashboards.add(superAdminDashboard.get());
-            userRepository.save(
-                    AppUser.builder()
-                            .username("iavtar")
-                            .firstName("System")
-                            .lastName("Master")
-                            .password(passwordEncoder.encode("12345"))
-                            .email("admin@gmail.com")
-                            .countryCode("+91")
-                            .phoneNumber("1234567890")
-                            .isActive(true)
-                            .roles(superAdminRoles)
-                            .dashboards(superAdminDashboards)
-                            .build()
-            );
+            Optional<DashboardTab> superAdminDashboardTab = dashboardRepository.findByName(DashboardTabs.ADMINISTRATION);
+            Set<DashboardTab> superAdminDashboardTabs = new HashSet<>();
+            superAdminDashboardTabs.add(superAdminDashboardTab.get());
+            userRepository.save(AppUser.builder().username("iavtar").firstName("System").lastName("Master").password(passwordEncoder.encode("12345"))
+                    .email("admin@gmail.com").phoneNumber("1234567890").isActive(true).roles(superAdminRoles).dashboardTabs(superAdminDashboardTabs)
+                    .build());
         }
     }
 
