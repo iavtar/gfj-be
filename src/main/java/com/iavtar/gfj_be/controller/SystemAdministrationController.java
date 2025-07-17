@@ -1,10 +1,10 @@
 package com.iavtar.gfj_be.controller;
 
 import com.iavtar.gfj_be.entity.AppUser;
-import com.iavtar.gfj_be.model.request.CreateUserRequest;
+import com.iavtar.gfj_be.model.request.AppUserRequest;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
-import com.iavtar.gfj_be.service.AppUserService;
+import com.iavtar.gfj_be.service.SystemAdministrationService;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.*;
 public class SystemAdministrationController {
 
     @Autowired
-    private AppUserService appUserService;
+    private SystemAdministrationService appUserService;
 
     @Autowired
     private CommonUtil commonUtil;
 
     @PostMapping("/user")
-    public ResponseEntity<?> createBusinessAdmin(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<?> createBusinessAdmin(@RequestBody AppUserRequest request) {
         try {
 
             log.info("Creating new business admin with username: {}", request.getUsername());

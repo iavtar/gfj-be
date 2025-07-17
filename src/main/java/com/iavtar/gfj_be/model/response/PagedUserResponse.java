@@ -18,12 +18,11 @@ public class PagedUserResponse<T> {
     private boolean hasMore;
 
     public static <T> PagedUserResponse<T> from(Page<T> page, int requestedOffset, int requestedSize) {
-        int currentOffset = requestedOffset;
         long totalRecords = page.getTotalElements();
-        boolean hasMore = (currentOffset + requestedSize) < totalRecords;
-        Integer nextOffset = hasMore ? currentOffset + requestedSize : null;
+        boolean hasMore = (requestedOffset + requestedSize) < totalRecords;
+        Integer nextOffset = hasMore ? requestedOffset + requestedSize : null;
 
-        return PagedUserResponse.<T> builder().data(page.getContent()).offset(currentOffset).size(requestedSize).totalRecords(totalRecords)
+        return PagedUserResponse.<T> builder().data(page.getContent()).offset(requestedOffset).size(requestedSize).totalRecords(totalRecords)
                 .nextOffset(nextOffset).hasMore(hasMore).build();
     }
 }

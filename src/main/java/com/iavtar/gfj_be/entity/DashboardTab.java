@@ -27,7 +27,7 @@ public class DashboardTab {
         if (!(o instanceof DashboardTab))
             return false;
         DashboardTab that = (DashboardTab) o;
-        return name == that.name; // assuming name is unique
+        return name == that.name;
     }
 
     @Override

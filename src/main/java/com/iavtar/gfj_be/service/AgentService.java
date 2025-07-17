@@ -1,9 +1,9 @@
 package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.Client;
-import com.iavtar.gfj_be.model.request.CreateClientRequest;
+import com.iavtar.gfj_be.model.request.ClientRequest;
+import com.iavtar.gfj_be.model.response.ClientResponse;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
-import com.iavtar.gfj_be.repository.AppUserRepository;
 import com.iavtar.gfj_be.repository.ClientRepository;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +16,6 @@ public class AgentService {
 
     @Autowired
     private ClientRepository clientRepository;
-
-    @Autowired
-    private AppUserRepository appUserRepository;
 
     @Autowired
     private CommonUtil commonUtil;
@@ -35,31 +32,19 @@ public class AgentService {
         return clientRepository.existsByPhoneNumber(phoneNumber);
     }
 
-    public Client createClient(CreateClientRequest request) {
+    public Client createClient(ClientRequest request) {
         log.info("Agent creating client: {}", request.getClientName());
 
-        Client savedClient = clientRepository.save(Client.builder()
-                .clientName(request.getClientName())
-                .businessLogoUrl(request.getBusinessLogoUrl())
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .businessAddress(request.getBusinessAddress())
-                .shippingAddress(request.getShippingAddress())
-                .city(request.getCity())
-                .state(request.getState())
-                .country(request.getCountry())
-                .zipCode(request.getZipCode())
-                .einNumber(request.getEinNumber())
-                .taxId(request.getTaxId())
-                .diamondSettingPrice(request.getDiamondSettingPrice())
-                .goldWastagePercentage(request.getGoldWastagePercentage())
-                .profitAndLabourPercentage(request.getProfitAndLabourPercentage())
-                .cadCamWaxPrice(request.getCadCamWaxPrice())
-                .agentId(request.getAgentId())
-                .build());
+        Client savedClient = clientRepository.save(
+                Client.builder().clientName(request.getClientName()).businessLogoUrl(request.getBusinessLogoUrl()).email(request.getEmail())
+                        .phoneNumber(request.getPhoneNumber()).businessAddress(request.getBusinessAddress())
+                        .shippingAddress(request.getShippingAddress()).city(request.getCity()).state(request.getState()).country(request.getCountry())
+                        .zipCode(request.getZipCode()).einNumber(request.getEinNumber()).taxId(request.getTaxId())
+                        .diamondSettingPrice(request.getDiamondSettingPrice()).goldWastagePercentage(request.getGoldWastagePercentage())
+                        .profitAndLabourPercentage(request.getProfitAndLabourPercentage()).cadCamWaxPrice(request.getCadCamWaxPrice())
+                        .agentId(request.getAgentId()).build());
 
-        log.info("Client created successfully with ID: {} by agent: {}",
-                savedClient.getId(), request.getAgentId());
+        log.info("Client created successfully with ID: {} by agent: {}", savedClient.getId(), request.getAgentId());
 
         return savedClient;
     }
@@ -69,7 +54,7 @@ public class AgentService {
         return commonUtil.findClientByName(clientName);
     }
 
-    public PagedUserResponse<Client> getAllClients(int offset, int size, String sortBy) {
+    public PagedUserResponse<ClientResponse> getAllClients(int offset, int size, String sortBy) {
         log.info("Getting all clients with pagination");
         return commonUtil.findAllClients(offset, size, sortBy);
     }
@@ -79,26 +64,72 @@ public class AgentService {
         return commonUtil.findClientsByAgent(agentId, offset, size, sortBy);
     }
 
-
-    private Client convertToEntity(CreateClientRequest request) {
-        Client client = new Client();
-        client.setClientName(request.getClientName());
-        client.setBusinessLogoUrl(request.getBusinessLogoUrl());
-        client.setEmail(request.getEmail());
-        client.setPhoneNumber(request.getPhoneNumber());
-        client.setBusinessAddress(request.getBusinessAddress());
-        client.setShippingAddress(request.getShippingAddress());
-        client.setCity(request.getCity());
-        client.setState(request.getState());
-        client.setCountry(request.getCountry());
-        client.setZipCode(request.getZipCode());
-        client.setEinNumber(request.getEinNumber());
-        client.setTaxId(request.getTaxId());
-        client.setDiamondSettingPrice(request.getDiamondSettingPrice());
-        client.setGoldWastagePercentage(request.getGoldWastagePercentage());
-        client.setProfitAndLabourPercentage(request.getProfitAndLabourPercentage());
-        client.setCadCamWaxPrice(request.getCadCamWaxPrice());
-        client.setAgentId(request.getAgentId());
-        return client;
+    public Client getClientById(Long id) {
+        return commonUtil.findClientById(id);
     }
+
+    public Client updateClient(ClientRequest request) {
+        log.info("Updating client with ID: {}", request.getId());
+
+        Client existingClient = commonUtil.findClientById(request.getId());
+        if (existingClient == null) {
+            throw new IllegalArgumentException("Client not found with ID: " + request.getId());
+        }
+
+        // Update only non-null fields (partial update)
+        if (request.getClientName() != null) {
+            existingClient.setClientName(request.getClientName());
+        }
+        if (request.getBusinessLogoUrl() != null) {
+            existingClient.setBusinessLogoUrl(request.getBusinessLogoUrl());
+        }
+        if (request.getEmail() != null) {
+            existingClient.setEmail(request.getEmail());
+        }
+        if (request.getPhoneNumber() != null) {
+            existingClient.setPhoneNumber(request.getPhoneNumber());
+        }
+        if (request.getBusinessAddress() != null) {
+            existingClient.setBusinessAddress(request.getBusinessAddress());
+        }
+        if (request.getShippingAddress() != null) {
+            existingClient.setShippingAddress(request.getShippingAddress());
+        }
+        if (request.getCity() != null) {
+            existingClient.setCity(request.getCity());
+        }
+        if (request.getState() != null) {
+            existingClient.setState(request.getState());
+        }
+        if (request.getCountry() != null) {
+            existingClient.setCountry(request.getCountry());
+        }
+        if (request.getZipCode() != null) {
+            existingClient.setZipCode(request.getZipCode());
+        }
+        if (request.getEinNumber() != null) {
+            existingClient.setEinNumber(request.getEinNumber());
+        }
+        if (request.getTaxId() != null) {
+            existingClient.setTaxId(request.getTaxId());
+        }
+        if (request.getDiamondSettingPrice() != null) {
+            existingClient.setDiamondSettingPrice(request.getDiamondSettingPrice());
+        }
+        if (request.getGoldWastagePercentage() != null) {
+            existingClient.setGoldWastagePercentage(request.getGoldWastagePercentage());
+        }
+        if (request.getProfitAndLabourPercentage() != null) {
+            existingClient.setProfitAndLabourPercentage(request.getProfitAndLabourPercentage());
+        }
+        if (request.getCadCamWaxPrice() != null) {
+            existingClient.setCadCamWaxPrice(request.getCadCamWaxPrice());
+        }
+
+        Client updatedClient = clientRepository.save(existingClient);
+        log.info("Client updated successfully with ID: {}", updatedClient.getId());
+
+        return updatedClient;
+    }
+
 }

@@ -52,7 +52,7 @@ public class AppUser implements Serializable {
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(name = "user_dashboard_tabs", // Keep your existing table name
+    @JoinTable(name = "user_dashboard_tabs",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "dashboard_tab_id", referencedColumnName = "id"))
     @Builder.Default
     private Set<DashboardTab> dashboardTabs = new HashSet<>();

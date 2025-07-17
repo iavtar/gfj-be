@@ -11,10 +11,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateClientRequest {
-
+public class ClientRequest {
+    private Long id;
     private String     clientName;
-    private String     clientLocation;
     private String     businessLogoUrl;
     private String     email;
     private String     phoneNumber;

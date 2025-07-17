@@ -1,0 +1,63 @@
+package com.iavtar.gfj_be.service;
+
+import com.iavtar.gfj_be.entity.Quotation;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
+import com.iavtar.gfj_be.repository.QuotationRepository;
+import com.iavtar.gfj_be.utility.CommonUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+@Service
+@Slf4j
+public class QuotationService {
+    @Autowired
+    private QuotationRepository quotationRepository;
+    @Autowired
+    private CommonUtil          commonUtil;
+
+    public Quotation createQuotation(Quotation quotation) {
+        return quotationRepository.save(Quotation.builder().data(quotation.getData()).price(quotation.getPrice()).agentId(quotation.getAgentId())
+                .clientId(quotation.getClientId()).updatedAt(LocalDateTime.now()).build());
+    }
+
+    public Quotation updateQuotation(Quotation quotation) {
+        Quotation existingQuotation = quotationRepository.findById(quotation.getId()).orElse(null);
+        if (existingQuotation == null) {
+            log.info("Quotation with id {} not found", quotation.getId());
+            throw new IllegalArgumentException("Quotation with id " + quotation.getId() + " not found");
+        }
+        if (quotation.getClientId() != null) {
+            existingQuotation.setClientId(quotation.getClientId());
+        }
+        if (quotation.getAgentId() != null) {
+            existingQuotation.setAgentId(quotation.getAgentId());
+        }
+        if (quotation.getData() != null) {
+            existingQuotation.setData(quotation.getData());
+        }
+        if (quotation.getPrice() != null) {
+            existingQuotation.setPrice(quotation.getPrice());
+        }
+        existingQuotation.setUpdatedAt(LocalDateTime.now());
+        return quotationRepository.save(quotation);
+    }
+
+    public void deleteQuotation(Long quotationId) {
+        log.info("Deleting quotation with id {}", quotationId);
+        quotationRepository.findById(quotationId).ifPresent(existingQuotation -> quotationRepository.deleteById(quotationId));
+    }
+
+    public Quotation findQuotationById(Long id) {
+        log.info("Finding quotation with id {}", id);
+        return quotationRepository.findById(id).orElse(null);
+    }
+
+    public PagedUserResponse<Quotation> findAllQuotations(Long clientId, int offset, int size, String sortBy) {
+        log.info("Getting all clients with pagination");
+        return commonUtil.findAllQuotations(offset, size, sortBy, clientId);
+    }
+
+}
