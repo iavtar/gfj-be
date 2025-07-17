@@ -1,5 +1,6 @@
 package com.iavtar.gfj_be.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,28 +31,33 @@ public class AppUser implements Serializable {
     private String firstName;
     private String lastName;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(unique = true, nullable = false)
     private String phoneNumber;
 
     @Column(nullable = false)
     private Boolean isActive = true;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(name = "user_dashboard_tabs", // Keep your existing table name
+    @JoinTable(name = "user_dashboard_tabs",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "dashboard_tab_id", referencedColumnName = "id"))
     @Builder.Default
     private Set<DashboardTab> dashboardTabs = new HashSet<>();
 
+    @JsonIgnore
     @CreationTimestamp
     private LocalDateTime createdAt;
 

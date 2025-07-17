@@ -1,7 +1,6 @@
 package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.AppUser;
-
 import com.iavtar.gfj_be.entity.Role;
 import com.iavtar.gfj_be.repository.AppUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

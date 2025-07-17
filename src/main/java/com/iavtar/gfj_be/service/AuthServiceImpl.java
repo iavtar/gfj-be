@@ -3,7 +3,6 @@ package com.iavtar.gfj_be.service;
 import com.iavtar.gfj_be.entity.AppUser;
 import com.iavtar.gfj_be.entity.DashboardTab;
 import com.iavtar.gfj_be.entity.Role;
-import com.iavtar.gfj_be.entity.enums.DashboardTabs;
 import com.iavtar.gfj_be.model.request.SignInRequest;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.model.response.SignInResponse;

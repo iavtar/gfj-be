@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "role")
@@ -28,8 +27,10 @@ public class Role implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Role)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Role))
+            return false;
         Role role = (Role) o;
         return Objects.equals(id, role.id);
     }
