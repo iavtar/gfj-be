@@ -19,13 +19,7 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
 
     Optional<Client> findByClientName(String clientName);
 
-    Page<Client> findByAgentId(Long agentId, Pageable pageable);
 
     Page<Client> findAllByAgentId(Long agentId, Pageable pageable);
 
-    boolean existsByClientNameAndIdNot(String clientName, Long id);
-
-    boolean existsByEmailAndIdNot(String email, Long id);
-
-    boolean existsByPhoneNumberAndIdNot(String phoneNumber, Long id);
 }

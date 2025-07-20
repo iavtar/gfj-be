@@ -38,45 +38,37 @@ public class BusinessAdminController {
     @Autowired
     private MaterialRepository materialRepository;
 
-    @PostMapping("/user")
+    @PostMapping("/agent")
     public ResponseEntity<?> createAgent(@RequestBody AppUserRequest request) {
         try {
-
             log.info("Creating new agent with username: {}", request.getUsername());
-
             if (commonUtil.existsByUsername(request.getUsername())) {
-                log.error("Validation failed - username already exists: {}", request.getUsername());
-                ServiceResponse errorResponse = ServiceResponse.builder().message("username already exists").build();
+                log.error("Validation failed - agent already exists: {}", request.getUsername());
+                ServiceResponse errorResponse = ServiceResponse.builder().message("agent already exists").build();
                 return ResponseEntity.internalServerError().body(errorResponse);
             }
-
             if (commonUtil.existsByEmail(request.getEmail())) {
                 log.error("Validation failed - email already exists: {}", request.getEmail());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("email already exists").build();
                 return ResponseEntity.internalServerError().body(errorResponse);
             }
-
             if (commonUtil.existsByPhoneNumber(request.getPhoneNumber())) {
                 log.error("Validation failed - phone number already exists: {}", request.getPhoneNumber());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Phone Number already exists").build();
                 return ResponseEntity.internalServerError().body(errorResponse);
             }
-
             // Create the business admin user
             bussinessAdminService.createAgent(request.getUsername(), request.getFirstName(), request.getLastName(), request.getPassword(),
                     request.getEmail(), request.getPhoneNumber());
-
             ServiceResponse response = ServiceResponse.builder().message("Agent Created Successfully").build();
-
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating Agent: ").build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
-    @GetMapping("/getUser")
+    @GetMapping("/getAgent")
     public ResponseEntity<?> getAgent(@RequestParam("username") String username) {
         try {
             AppUser appUser = bussinessAdminService.getAgent(username);
@@ -87,9 +79,9 @@ public class BusinessAdminController {
         }
     }
 
-    @GetMapping("/getAllUser")
+    @GetMapping("/getAllAgents")
     public ResponseEntity<?> getAllAgent(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
+                                         @RequestParam(defaultValue = "id") String sortBy) {
         try {
             PagedUserResponse<AppUser> response = bussinessAdminService.getAgents(offset, size, sortBy);
             return ResponseEntity.ok(response);
@@ -101,13 +93,11 @@ public class BusinessAdminController {
 
     @GetMapping("/clients")
     public ResponseEntity<?> getAllClients(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
+                                           @RequestParam(defaultValue = "id") String sortBy) {
         try {
             log.info("Getting all clients with pagination: offset={}, size={}, sortBy={}", offset, size, sortBy);
-
             PagedUserResponse<ClientResponse> response = agentService.getAllClients(offset, size, sortBy);
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             log.error("Error getting all clients: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all clients").build();
@@ -115,11 +105,10 @@ public class BusinessAdminController {
         }
     }
 
-    @PostMapping("/updateUser")
+    @PostMapping("/updateAgent")
     public ResponseEntity<?> updateAgent(@RequestBody AppUserRequest request) {
         try {
             log.info("Updating agent with ID: {}", request.getId());
-
             if (request.getId() == null) {
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Agent ID is required for update").build();
                 return ResponseEntity.badRequest().body(errorResponse);
@@ -136,12 +125,10 @@ public class BusinessAdminController {
 
             ServiceResponse response = ServiceResponse.builder().message("Agent updated successfully").build();
             return ResponseEntity.ok(response);
-
         } catch (IllegalArgumentException e) {
             log.error("Validation error updating agent: {}", e.getMessage());
             ServiceResponse errorResponse = ServiceResponse.builder().message(e.getMessage()).build();
             return ResponseEntity.badRequest().body(errorResponse);
-
         } catch (Exception e) {
             log.error("Error updating agent: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error updating agent: " + e.getMessage()).build();
@@ -256,7 +243,6 @@ public class BusinessAdminController {
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error deleting material : " + material.getTitle()).build();
             return ResponseEntity.badRequest().body(errorResponse);
         }
-
     }
 
 }

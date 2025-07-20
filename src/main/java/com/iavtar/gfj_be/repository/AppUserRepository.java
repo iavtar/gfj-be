@@ -16,7 +16,4 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     Page<AppUser> findByRoles_Name(RoleType roleType, Pageable pageable);
 
-    boolean existsByEmailAndIdNot(String email, Long id);
-
-    boolean existsByPhoneNumberAndIdNot(String phoneNumber, Long id);
 }

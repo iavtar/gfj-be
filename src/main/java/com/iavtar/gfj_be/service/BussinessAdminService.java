@@ -46,15 +46,12 @@ public class BussinessAdminService {
                 log.error("AGENT role not found in database");
                 return new IllegalStateException("AGENT role not found in database");
             });
-
             Set<DashboardTab> agentDashboardTabs = commonUtil.getDashboardTabsForAgent();
             AppUser savedUser = appUserRepository.save(commonUtil.addRoleAndDashboardTabs(
                     AppUser.builder().username(username).firstName(firstName).lastName(lastName).password(passwordEncoder.encode(password))
                             .email(email).phoneNumber(phoneNumber).isActive(true).roles(new HashSet<>()).dashboardTabs(new HashSet<>()).build(),
                     agentRole, agentDashboardTabs));
-
             log.info("Successfully created agent: {} with ID: {}", savedUser.getUsername(), savedUser.getId());
-
         } catch (IllegalArgumentException | IllegalStateException e) {
             log.error("Business logic error creating agent {}: {}", username, e.getMessage());
             throw e;
@@ -77,13 +74,14 @@ public class BussinessAdminService {
     }
 
     public AppUser updateAgent(AppUserRequest request) {
-
         AppUser existingAgent = commonUtil.findAgentById(request.getId());
         if (existingAgent == null) {
             throw new IllegalArgumentException("Agent not found with ID: " + request.getId());
         }
-
         // Update only non-null fields (partial update)
+        if (request.getUsername() != null) {
+            existingAgent.setUsername(request.getUsername());
+        }
         if (request.getFirstName() != null) {
             existingAgent.setFirstName(request.getFirstName());
         }
@@ -96,21 +94,16 @@ public class BussinessAdminService {
         if (request.getPhoneNumber() != null) {
             existingAgent.setPhoneNumber(request.getPhoneNumber());
         }
-
         if (request.getPassword() != null) {
             existingAgent.setPassword(passwordEncoder.encode(request.getPassword()));
         }
-
         existingAgent.setIsActive(request.isActive());
-
         AppUser updatedAgent = appUserRepository.save(existingAgent);
         log.info("Agent updated successfully with ID: {}", updatedAgent.getId());
-
         return updatedAgent;
     }
 
     public void deleteClient(Long id) {
-
         clientRepository.deleteById(id);
     }
 
