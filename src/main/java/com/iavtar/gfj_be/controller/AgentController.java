@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/agent")
@@ -28,36 +30,25 @@ public class AgentController {
     public ResponseEntity<?> createClient(@RequestBody ClientRequest request) {
         try {
             log.info("Creating new client with clientName: {}", request.getClientName());
-
             if (agentService.existsByClientName(request.getClientName())) {
                 log.error("Validation failed - client name already exists: {}", request.getClientName());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Client name already exists").build();
                 return ResponseEntity.badRequest().body(errorResponse);
             }
-
             if (agentService.existsByEmail(request.getEmail())) {
                 log.error("Validation failed - email already exists: {}", request.getEmail());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Email already exists").build();
                 return ResponseEntity.badRequest().body(errorResponse);
             }
-
             if (agentService.existsByPhoneNumber(request.getPhoneNumber())) {
                 log.error("Validation failed - phone number already exists: {}", request.getPhoneNumber());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Phone number already exists").build();
                 return ResponseEntity.badRequest().body(errorResponse);
             }
-
             Client createdClient = agentService.createClient(request);
             log.info("Client created successfully with ID: {}", createdClient.getId());
-
             ServiceResponse response = ServiceResponse.builder().message("Client created successfully").build();
             return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            log.error("Validation error creating client: {}", e.getMessage());
-            ServiceResponse errorResponse = ServiceResponse.builder().message(e.getMessage()).build();
-            return ResponseEntity.badRequest().body(errorResponse);
-
         } catch (Exception e) {
             log.error("Error creating client: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating client: " + e.getMessage()).build();
@@ -69,15 +60,12 @@ public class AgentController {
     public ResponseEntity<?> getClientByName(@RequestParam("clientName") String clientName) {
         try {
             log.info("Getting client by name: {}", clientName);
-
-            Client client = agentService.getClientByName(clientName);
-            if (client == null) {
+            Optional<Client> client = Optional.ofNullable(agentService.getClientByName(clientName));
+            if (client.isEmpty()) {
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Client not found: " + clientName).build();
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.internalServerError().body(errorResponse);
             }
-
             return ResponseEntity.ok(client);
-
         } catch (Exception e) {
             log.error("Error getting client by name: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting client: " + clientName).build();
@@ -90,10 +78,8 @@ public class AgentController {
             @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sortBy) {
         try {
             log.info("Getting clients for agent: {} with pagination: offset={}, size={}, sortBy={}", agentId, offset, size, sortBy);
-
             PagedUserResponse<Client> response = agentService.getClientsByAgent(agentId, offset, size, sortBy);
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             log.error("Error getting clients for agent {}: {}", agentId, e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting clients for agent").build();
@@ -105,24 +91,19 @@ public class AgentController {
     public ResponseEntity<?> updateClient(@RequestBody ClientRequest request) {
         try {
             log.info("Updating client with ID: {}", request.getId());
-
             if (request.getId() == null) {
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Client ID is required for update").build();
                 return ResponseEntity.badRequest().body(errorResponse);
             }
-
             Client existingClient = agentService.getClientById(request.getId());
             if (existingClient == null) {
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Client not found").build();
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
             }
-
             Client updatedClient = agentService.updateClient(request);
             log.info("Client updated successfully with ID: {}", updatedClient.getId());
-
             ServiceResponse response = ServiceResponse.builder().message("Client updated successfully").build();
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             log.error("Error updating client: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error updating client: " + e.getMessage()).build();
@@ -133,7 +114,6 @@ public class AgentController {
     @PostMapping("/createQuotation")
     public ResponseEntity<?> createQuotation(@RequestBody Quotation request) {
         try {
-
             log.info("Creating quotation for agent: {}", request.getId());
             Quotation createdQuotation = quotationService.createQuotation(request);
             log.info("Quotation created successfully with ID: {}", createdQuotation.getId());
@@ -161,7 +141,7 @@ public class AgentController {
         }
     }
 
-    @DeleteMapping("deleteQuotation")
+    @DeleteMapping("/deleteQuotation")
     public ResponseEntity<?> deleteQuotation(@RequestParam("quotationId") Long quotationId) {
         try {
             log.info("Deleting quotation for agent: {}", quotationId);
@@ -189,10 +169,9 @@ public class AgentController {
         }
     }
 
-    @GetMapping("getAllQuotation")
+    @GetMapping("/getAllQuotation")
     public ResponseEntity<?> getAllQuotation(@RequestParam("clientId") Long clientId, @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sortBy) {
-
         try {
             log.info("Getting all quotations for a client: {}", clientId);
             PagedUserResponse<Quotation> quotations = quotationService.findAllQuotations(clientId, offset, size, sortBy);

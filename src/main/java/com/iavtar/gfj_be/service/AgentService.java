@@ -34,7 +34,6 @@ public class AgentService {
 
     public Client createClient(ClientRequest request) {
         log.info("Agent creating client: {}", request.getClientName());
-
         Client savedClient = clientRepository.save(
                 Client.builder().clientName(request.getClientName()).businessLogoUrl(request.getBusinessLogoUrl()).email(request.getEmail())
                         .phoneNumber(request.getPhoneNumber()).businessAddress(request.getBusinessAddress())
