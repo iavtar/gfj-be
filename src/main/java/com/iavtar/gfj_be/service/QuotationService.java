@@ -20,7 +20,7 @@ public class QuotationService {
 
     public Quotation createQuotation(Quotation quotation) {
         return quotationRepository.save(Quotation.builder().data(quotation.getData()).price(quotation.getPrice()).agentId(quotation.getAgentId())
-                .clientId(quotation.getClientId()).updatedAt(LocalDateTime.now()).build());
+                .clientId(quotation.getClientId()).quotationStatus(quotation.getQuotationStatus()).updatedAt(LocalDateTime.now()).build());
     }
 
     public Quotation updateQuotation(Quotation quotation) {
@@ -40,6 +40,9 @@ public class QuotationService {
         }
         if (quotation.getPrice() != null) {
             existingQuotation.setPrice(quotation.getPrice());
+        }
+        if(quotation.getQuotationStatus() != null) {
+            existingQuotation.setQuotationStatus(quotation.getQuotationStatus());
         }
         existingQuotation.setUpdatedAt(LocalDateTime.now());
         return quotationRepository.save(quotation);
