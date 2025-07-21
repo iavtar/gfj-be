@@ -9,11 +9,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateBusinessAdminRequest {
+public class AppUserRequest {
+    private Long id;
     private String username;
     private String firstName;
     private String lastName;
     private String password;
     private String email;
     private String phoneNumber;
+    private boolean active;
 }
