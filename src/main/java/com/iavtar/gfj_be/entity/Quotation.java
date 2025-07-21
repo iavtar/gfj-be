@@ -35,6 +35,9 @@ public class Quotation {
     @Column
     private Long clientId;
 
+    @Column
+    private String quotationStatus;
+
     @Column(updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
