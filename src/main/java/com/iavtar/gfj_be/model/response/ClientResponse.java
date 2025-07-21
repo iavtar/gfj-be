@@ -13,25 +13,25 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class ClientResponse {
-    private Long       id;
-    private String     clientName;
-    private String     businessLogoUrl;
-    private String     email;
-    private String     phoneNumber;
-    private String     businessAddress;
-    private String     shippingAddress;
-    private String     city;
-    private String     state;
-    private String     country;
-    private String     zipCode;
-    private String     einNumber;
-    private String     taxId;
+    private Long id;
+    private String clientName;
+    private String businessLogoUrl;
+    private String email;
+    private String phoneNumber;
+    private String businessAddress;
+    private String shippingAddress;
+    private String city;
+    private String state;
+    private String country;
+    private String zipCode;
+    private String einNumber;
+    private String taxId;
     private BigDecimal diamondSettingPrice;
     private BigDecimal goldWastagePercentage;
     private BigDecimal profitAndLabourPercentage;
     private BigDecimal cadCamWaxPrice;
-    private Long       agentId;
-    private String     agentName;
+    private Long agentId;
+    private String agentName;
 
     public static ClientResponse from(Client client) {
         return ClientResponse.builder().id(client.getId()).clientName(client.getClientName()).businessLogoUrl(client.getBusinessLogoUrl())

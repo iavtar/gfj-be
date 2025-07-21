@@ -17,5 +17,5 @@ public class AppUserRequest {
     private String password;
     private String email;
     private String phoneNumber;
-    boolean isActive;
+    private boolean active;
 }

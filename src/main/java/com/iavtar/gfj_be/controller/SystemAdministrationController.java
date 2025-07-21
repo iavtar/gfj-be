@@ -25,35 +25,27 @@ public class SystemAdministrationController {
     @PostMapping("/user")
     public ResponseEntity<?> createBusinessAdmin(@RequestBody AppUserRequest request) {
         try {
-
             log.info("Creating new business admin with username: {}", request.getUsername());
-
             if (commonUtil.existsByUsername(request.getUsername())) {
                 log.error("Validation failed - username already exists: {}", request.getUsername());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("username already exists").build();
                 return ResponseEntity.internalServerError().body(errorResponse);
             }
-
             if (commonUtil.existsByEmail(request.getEmail())) {
                 log.error("Validation failed - email already exists: {}", request.getEmail());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("email already exists").build();
                 return ResponseEntity.internalServerError().body(errorResponse);
             }
-
             if (commonUtil.existsByPhoneNumber(request.getPhoneNumber())) {
                 log.error("Validation failed - phone number already exists: {}", request.getPhoneNumber());
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Phone Number already exists").build();
                 return ResponseEntity.internalServerError().body(errorResponse);
             }
-
             // Create the business admin user
             appUserService.createBusinessAdmin(request.getUsername(), request.getFirstName(), request.getLastName(), request.getPassword(),
                     request.getEmail(), request.getPhoneNumber());
-
             ServiceResponse response = ServiceResponse.builder().message("Business Admin Created Successfully").build();
-
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating business admin: ").build();
             return ResponseEntity.internalServerError().body(errorResponse);
@@ -82,4 +74,5 @@ public class SystemAdministrationController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
+
 }

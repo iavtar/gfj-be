@@ -49,6 +49,10 @@ public class AgentController {
             log.info("Client created successfully with ID: {}", createdClient.getId());
             ServiceResponse response = ServiceResponse.builder().message("Client created successfully").build();
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            log.error("Validation error creating client: {}", e.getMessage());
+            ServiceResponse errorResponse = ServiceResponse.builder().message(e.getMessage()).build();
+            return ResponseEntity.badRequest().body(errorResponse);
         } catch (Exception e) {
             log.error("Error creating client: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating client: " + e.getMessage()).build();
@@ -60,8 +64,8 @@ public class AgentController {
     public ResponseEntity<?> getClientByName(@RequestParam("clientName") String clientName) {
         try {
             log.info("Getting client by name: {}", clientName);
-            Optional<Client> client = Optional.ofNullable(agentService.getClientByName(clientName));
-            if (client.isEmpty()) {
+            Client client = agentService.getClientByName(clientName);
+            if (client == null) {
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Client not found: " + clientName).build();
                 return ResponseEntity.internalServerError().body(errorResponse);
             }
@@ -169,9 +173,11 @@ public class AgentController {
         }
     }
 
-    @GetMapping("/getAllQuotation")
-    public ResponseEntity<?> getAllQuotation(@RequestParam("clientId") Long clientId, @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sortBy) {
+    @GetMapping("getAllQuotation")
+    public ResponseEntity<?> getAllQuotation(@RequestParam("clientId") Long clientId,
+                                             @RequestParam(defaultValue = "0") int offset,
+                                             @RequestParam(defaultValue = "10") int size,
+                                             @RequestParam(defaultValue = "id") String sortBy) {
         try {
             log.info("Getting all quotations for a client: {}", clientId);
             PagedUserResponse<Quotation> quotations = quotationService.findAllQuotations(clientId, offset, size, sortBy);

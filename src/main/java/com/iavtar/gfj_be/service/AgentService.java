@@ -69,12 +69,10 @@ public class AgentService {
 
     public Client updateClient(ClientRequest request) {
         log.info("Updating client with ID: {}", request.getId());
-
         Client existingClient = commonUtil.findClientById(request.getId());
         if (existingClient == null) {
             throw new IllegalArgumentException("Client not found with ID: " + request.getId());
         }
-
         // Update only non-null fields (partial update)
         if (request.getClientName() != null) {
             existingClient.setClientName(request.getClientName());
@@ -124,10 +122,11 @@ public class AgentService {
         if (request.getCadCamWaxPrice() != null) {
             existingClient.setCadCamWaxPrice(request.getCadCamWaxPrice());
         }
-
+        if (request.getAgentId() != null) {
+            existingClient.setAgentId(request.getAgentId());
+        }
         Client updatedClient = clientRepository.save(existingClient);
         log.info("Client updated successfully with ID: {}", updatedClient.getId());
-
         return updatedClient;
     }
 

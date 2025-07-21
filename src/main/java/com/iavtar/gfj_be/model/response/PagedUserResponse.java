@@ -11,9 +11,9 @@ import java.util.List;
 public class PagedUserResponse<T> {
 
     private List<T> data;
-    private int     offset;
-    private int     size;
-    private long    totalRecords;
+    private int offset;
+    private int size;
+    private long totalRecords;
     private Integer nextOffset;
     private boolean hasMore;
 
@@ -22,7 +22,7 @@ public class PagedUserResponse<T> {
         boolean hasMore = (requestedOffset + requestedSize) < totalRecords;
         Integer nextOffset = hasMore ? requestedOffset + requestedSize : null;
 
-        return PagedUserResponse.<T> builder().data(page.getContent()).offset(requestedOffset).size(requestedSize).totalRecords(totalRecords)
+        return PagedUserResponse.<T>builder().data(page.getContent()).offset(requestedOffset).size(requestedSize).totalRecords(totalRecords)
                 .nextOffset(nextOffset).hasMore(hasMore).build();
     }
 }
