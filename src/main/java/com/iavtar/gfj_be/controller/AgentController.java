@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/agent")
@@ -65,7 +67,7 @@ public class AgentController {
             Client client = agentService.getClientByName(clientName);
             if (client == null) {
                 ServiceResponse errorResponse = ServiceResponse.builder().message("Client not found: " + clientName).build();
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.internalServerError().body(errorResponse);
             }
             return ResponseEntity.ok(client);
         } catch (Exception e) {
@@ -143,7 +145,7 @@ public class AgentController {
         }
     }
 
-    @DeleteMapping("deleteQuotation")
+    @DeleteMapping("/deleteQuotation")
     public ResponseEntity<?> deleteQuotation(@RequestParam("quotationId") Long quotationId) {
         try {
             log.info("Deleting quotation for agent: {}", quotationId);
