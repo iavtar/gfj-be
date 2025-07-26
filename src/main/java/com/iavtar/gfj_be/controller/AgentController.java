@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -173,7 +174,7 @@ public class AgentController {
         }
     }
 
-    @GetMapping("getAllQuotation")
+    @GetMapping("/getAllQuotation")
     public ResponseEntity<?> getAllQuotation(@RequestParam("clientId") Long clientId,
                                              @RequestParam(defaultValue = "0") int offset,
                                              @RequestParam(defaultValue = "10") int size,
@@ -187,6 +188,18 @@ public class AgentController {
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all quotations").build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
+    }
+
+    @PostMapping("/quotation/upload")
+    public ResponseEntity<?> uploadQuotationImage(@RequestParam("file")MultipartFile file, @RequestParam("quotationId") Long quotationId) {
+        try {
+            return quotationService.uploadQuotationImage(file, quotationId);
+        } catch (Exception e) {
+            log.error("Error uploading quotations image: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error uploading quotations image").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+
     }
 
 }

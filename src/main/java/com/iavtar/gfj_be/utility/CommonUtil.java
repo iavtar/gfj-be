@@ -16,7 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +33,8 @@ public class CommonUtil {
     private DashboardRepository dashboardRepository;
     @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private S3Util s3Util;
     @Autowired
     private QuotationRepository quotationRepository;
 
@@ -196,6 +201,16 @@ public class CommonUtil {
     public Client findClientById(Long id) {
         log.debug("Finding client by ID: {}", id);
         return clientRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public String uploadFile(MultipartFile file, Long quotationId) throws IOException {
+        var quotation = quotationRepository.findById(quotationId)
+                .orElseThrow(() -> new IllegalArgumentException("Quotation not found with ID: " + quotationId));
+        String url = s3Util.uploadFile(file, "quotations");
+        quotation.setImageUrl(url);
+        quotationRepository.save(quotation);
+        return url;
     }
 
 }

@@ -38,6 +38,9 @@ public class Quotation {
     @Column
     private String quotationStatus;
 
+    @Column
+    private String imageUrl;
+
     @Column(updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
