@@ -2,11 +2,15 @@ package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
+import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.repository.QuotationRepository;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -61,6 +65,20 @@ public class QuotationService {
     public PagedUserResponse<Quotation> findAllQuotations(Long clientId, int offset, int size, String sortBy) {
         log.info("Getting all clients with pagination");
         return commonUtil.findAllQuotations(offset, size, sortBy, clientId);
+    }
+
+    public ResponseEntity<?> uploadQuotationImage(MultipartFile file, Long quotationId) {
+        try {
+            String url = commonUtil.uploadFile(file, quotationId);
+            return ResponseEntity.ok(url);
+        } catch (Exception e) {
+            log.error("Error uploading quotations image: {}", e.getMessage(), e);
+            return new ResponseEntity<>(
+                    ServiceResponse.builder()
+                            .message("Error uploading quotations image")
+                            .build(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
