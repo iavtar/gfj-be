@@ -62,9 +62,19 @@ public class QuotationService {
         return quotationRepository.findById(id).orElse(null);
     }
 
-    public PagedUserResponse<Quotation> findAllQuotations(Long clientId, int offset, int size, String sortBy) {
-        log.info("Getting all clients with pagination");
-        return commonUtil.findAllQuotations(offset, size, sortBy, clientId);
+    public PagedUserResponse<Quotation> findAllQuotationsByClient(Long clientId, int offset, int size, String sortBy) {
+        log.info("Getting all quotations for client: {}", clientId);
+        return commonUtil.findAllQuotationsByClient(clientId, offset, size, sortBy);
+    }
+
+    public PagedUserResponse<Quotation> findAllQuotationsByAgent(Long agentId, int offset, int size, String sortBy) {
+        log.info("Getting all quotations for agent: {}", agentId);
+        return commonUtil.findAllQuotationsByAgent(agentId, offset, size, sortBy);
+    }
+
+    public PagedUserResponse<Quotation> findAllQuotationsByClientAndAgent(Long clientId, Long agentId, int offset, int size, String sortBy) {
+        log.info("Getting all quotations for client: {} and agent: {}", clientId, agentId);
+        return commonUtil.findAllQuotationsByClientAndAgent(clientId, agentId, offset, size, sortBy);
     }
 
     public ResponseEntity<?> uploadQuotationImage(MultipartFile file, Long quotationId) {

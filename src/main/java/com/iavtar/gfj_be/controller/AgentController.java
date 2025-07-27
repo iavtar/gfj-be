@@ -164,8 +164,14 @@ public class AgentController {
     @GetMapping("/getQuotation")
     public ResponseEntity<?> getQuotation(@RequestParam("id") Long id) {
         try {
-            log.info("Getting quotation for agent: {}", id);
+            log.info("Getting quotation with ID: {}", id);
             Quotation quotation = quotationService.findQuotationById(id);
+            if (quotation == null) {
+                ServiceResponse errorResponse = ServiceResponse.builder()
+                        .message("Quotation not found with ID: " + id)
+                        .build();
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            }
             return ResponseEntity.ok(quotation);
         } catch (Exception e) {
             log.error("Error getting quotation: {}", e.getMessage(), e);
@@ -174,24 +180,61 @@ public class AgentController {
         }
     }
 
-    @GetMapping("/getAllQuotation")
-    public ResponseEntity<?> getAllQuotation(@RequestParam("clientId") Long clientId,
-                                             @RequestParam(defaultValue = "0") int offset,
-                                             @RequestParam(defaultValue = "10") int size,
-                                             @RequestParam(defaultValue = "id") String sortBy) {
+    @GetMapping("/getAllQuotationsByClient")
+    public ResponseEntity<?> getAllQuotationsByClient(@RequestParam("clientId") Long clientId,
+                                                      @RequestParam(defaultValue = "0") int offset,
+                                                      @RequestParam(defaultValue = "10") int size,
+                                                      @RequestParam(defaultValue = "id") String sortBy) {
         try {
-            log.info("Getting all quotations for a client: {}", clientId);
-            PagedUserResponse<Quotation> quotations = quotationService.findAllQuotations(clientId, offset, size, sortBy);
+            log.info("Getting all quotations for client: {}", clientId);
+            PagedUserResponse<Quotation> quotations = quotationService.findAllQuotationsByClient(clientId, offset, size, sortBy);
             return ResponseEntity.ok(quotations);
         } catch (Exception e) {
-            log.error("Error getting all quotations: {}", e.getMessage(), e);
-            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all quotations").build();
+            log.error("Error getting quotations for client {}: {}", clientId, e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting quotations for client").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/getAllQuotationsByAgent")
+    public ResponseEntity<?> getAllQuotationsByAgent(@RequestParam("agentId") Long agentId,
+                                                     @RequestParam(defaultValue = "0") int offset,
+                                                     @RequestParam(defaultValue = "10") int size,
+                                                     @RequestParam(defaultValue = "id") String sortBy) {
+        try {
+            log.info("Getting all quotations for agent: {}", agentId);
+            PagedUserResponse<Quotation> quotations = quotationService.findAllQuotationsByAgent(agentId, offset, size, sortBy);
+            return ResponseEntity.ok(quotations);
+        } catch (Exception e) {
+            log.error("Error getting quotations for agent {}: {}", agentId, e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error getting quotations for agent")
+                    .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/getAllQuotationsByClientAndAgent")
+    public ResponseEntity<?> getAllQuotationsByClientAndAgent(@RequestParam("clientId") Long clientId,
+                                                              @RequestParam("agentId") Long agentId,
+                                                              @RequestParam(defaultValue = "0") int offset,
+                                                              @RequestParam(defaultValue = "10") int size,
+                                                              @RequestParam(defaultValue = "id") String sortBy) {
+        try {
+            log.info("Getting all quotations for client: {} and agent: {}", clientId, agentId);
+            PagedUserResponse<Quotation> quotations = quotationService.findAllQuotationsByClientAndAgent(clientId, agentId, offset, size, sortBy);
+            return ResponseEntity.ok(quotations);
+        } catch (Exception e) {
+            log.error("Error getting quotations for client {} and agent {}: {}", clientId, agentId, e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error getting quotations for client and agent")
+                    .build();
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
     @PostMapping("/quotation/upload")
-    public ResponseEntity<?> uploadQuotationImage(@RequestParam("file")MultipartFile file, @RequestParam("quotationId") Long quotationId) {
+    public ResponseEntity<?> uploadQuotationImage(@RequestParam("file") MultipartFile file, @RequestParam("quotationId") Long quotationId) {
         try {
             return quotationService.uploadQuotationImage(file, quotationId);
         } catch (Exception e) {

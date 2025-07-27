@@ -182,16 +182,6 @@ public class CommonUtil {
         return PagedUserResponse.from(clientPage, offset, size);
     }
 
-    public PagedUserResponse<Quotation> findAllQuotations(int offset, int size, String sortBy, Long clientId) {
-        log.debug("Finding all quotations for a client: {}", clientId);
-        int page = offset / size;
-        Sort sort = Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Quotation> quotationPage = quotationRepository.findAllByClientId(clientId, pageable);
-        log.info("Found {} quotations for a client: {}", quotationPage.getNumberOfElements(), clientId);
-        return PagedUserResponse.from(quotationPage, offset, size);
-    }
-
     public AppUser findAgentById(Long id) {
         log.debug("Finding agent by ID: {}", id);
         return appUserRepository.findById(id).filter(user -> user.getRoles().stream().anyMatch(role -> role.getName().equals(RoleType.AGENT)))
@@ -212,5 +202,36 @@ public class CommonUtil {
         quotationRepository.save(quotation);
         return url;
     }
+
+    public PagedUserResponse<Quotation> findAllQuotationsByClient(Long clientId, int offset, int size, String sortBy) {
+        log.debug("Finding all quotations for client: {}", clientId);
+        int page = offset / size;
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Quotation> quotationPage = quotationRepository.findAllByClientId(clientId, pageable);
+        log.info("Found {} quotations for client: {}", quotationPage.getNumberOfElements(), clientId);
+        return PagedUserResponse.from(quotationPage, offset, size);
+    }
+
+    public PagedUserResponse<Quotation> findAllQuotationsByAgent(Long agentId, int offset, int size, String sortBy) {
+        log.debug("Finding all quotations for agent: {}", agentId);
+        int page = offset / size;
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Quotation> quotationPage = quotationRepository.findAllByAgentId(agentId, pageable);
+        log.info("Found {} quotations for agent: {}", quotationPage.getNumberOfElements(), agentId);
+        return PagedUserResponse.from(quotationPage, offset, size);
+    }
+
+    public PagedUserResponse<Quotation> findAllQuotationsByClientAndAgent(Long clientId, Long agentId, int offset, int size, String sortBy) {
+        log.debug("Finding all quotations for client: {} and agent: {}", clientId, agentId);
+        int page = offset / size;
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Quotation> quotationPage = quotationRepository.findAllByClientIdAndAgentId(clientId, agentId, pageable);
+        log.info("Found {} quotations for client: {} and agent: {}", quotationPage.getNumberOfElements(), clientId, agentId);
+        return PagedUserResponse.from(quotationPage, offset, size);
+    }
+
 
 }
