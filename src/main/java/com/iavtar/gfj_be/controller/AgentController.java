@@ -4,6 +4,7 @@ import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.model.request.ClientRequest;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
+import com.iavtar.gfj_be.model.response.QuotationCreationResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.service.AgentService;
 import com.iavtar.gfj_be.service.QuotationService;
@@ -122,8 +123,7 @@ public class AgentController {
             log.info("Creating quotation for agent: {}", request.getId());
             Quotation createdQuotation = quotationService.createQuotation(request);
             log.info("Quotation created successfully with ID: {}", createdQuotation.getId());
-            ServiceResponse response = ServiceResponse.builder().message("Quotation created successfully").build();
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(QuotationCreationResponse.builder().quotationId(createdQuotation.getId()));
         } catch (Exception e) {
             log.error("Error creating quotation: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating quotation").build();

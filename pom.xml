@@ -10,12 +10,12 @@
 	</parent>
 	<groupId>com.iavtar</groupId>
 	<artifactId>gfj-be</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.6-SNAPSHOT</version>
 	<name>gfj-be</name>
 	<description>Gems From Jaipur Backend</description>
 	<url/>
 	<licenses>
-		<license/>
+		<license/>g
 	</licenses>
 	<developers>
 		<developer/>
