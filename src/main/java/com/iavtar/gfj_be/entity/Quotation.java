@@ -23,7 +23,8 @@ public class Quotation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String data;
 
     @Column

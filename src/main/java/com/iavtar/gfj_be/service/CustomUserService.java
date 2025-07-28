@@ -37,4 +37,14 @@ public class CustomUserService implements UserDetailsService {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName().getValue())).collect(Collectors.toList());
     }
 
+    /**
+     * Find a user by their username.
+     * 
+     * @param username The username to search for
+     * @return Optional containing the user if found
+     */
+    public Optional<AppUser> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
 }
