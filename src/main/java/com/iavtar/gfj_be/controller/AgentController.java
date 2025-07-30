@@ -123,7 +123,7 @@ public class AgentController {
             log.info("Creating quotation for agent: {}", request.getId());
             Quotation createdQuotation = quotationService.createQuotation(request);
             log.info("Quotation created successfully with ID: {}", createdQuotation.getId());
-            return ResponseEntity.ok(QuotationCreationResponse.builder().quotationId(createdQuotation.getId()));
+            return ResponseEntity.ok(QuotationCreationResponse.builder().quotationId(createdQuotation.getId()).build());
         } catch (Exception e) {
             log.error("Error creating quotation: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating quotation").build();
