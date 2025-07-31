@@ -1,3 +1,19 @@
+server:
+  port: 8080
+  # SSL Configuration - Comment out for HTTP development
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: Qazplm12345!
+    key-store-type: PKCS12
+    key-alias: gfj-myapi
+
+# Alternative HTTP configuration for development (uncomment the lines below and comment out SSL above)
+# server:
+#   port: 8080
+#   ssl:
+#     enabled: false
+
 spring:
   sql:
     init:

@@ -49,7 +49,7 @@ public class QuotationService {
             existingQuotation.setQuotationStatus(quotation.getQuotationStatus());
         }
         existingQuotation.setUpdatedAt(LocalDateTime.now());
-        return quotationRepository.save(quotation);
+        return quotationRepository.save(existingQuotation);
     }
 
     public void deleteQuotation(Long quotationId) {
