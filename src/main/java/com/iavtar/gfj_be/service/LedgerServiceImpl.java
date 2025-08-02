@@ -10,7 +10,6 @@ import com.iavtar.gfj_be.model.response.PagedLedgerTransactionWithClientResponse
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.repository.ClientRepository;
 import com.iavtar.gfj_be.repository.LedgerRespository;
-import com.iavtar.gfj_be.utility.CustomIdGeneratorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,12 +34,15 @@ public class LedgerServiceImpl implements LedgerService {
     @Autowired
     private ClientRepository clientRepository;
 
+    @Autowired
+    private LedegrIdGeneratorService ledegrIdGeneratorService;
+
     @Override
     public ResponseEntity<?> createLedgerTransaction(CreateLedgerTransactionRequest request) {
         try {
             ledgerRespository.save(
                     LedgerTransaction.builder()
-                            .transactionId(CustomIdGeneratorUtil.generateId())
+                            .transactionId(ledegrIdGeneratorService.generateId())
                             .clientId(request.getClientId())
                             .amount(request.getAmount())
                             .paymentMethod(request.getPaymentMethod())
