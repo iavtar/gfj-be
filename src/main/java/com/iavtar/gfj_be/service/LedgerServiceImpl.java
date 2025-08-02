@@ -54,7 +54,9 @@ public class LedgerServiceImpl implements LedgerService {
                             .description(request.getDescription())
                             .build()
             );
-            return new ResponseEntity<>(ServiceResponse.builder().build(), HttpStatus.OK);
+            return new ResponseEntity<>(ServiceResponse.builder()
+                    .message("Ledger Transaction added successfully!")
+                    .build(), HttpStatus.OK);
         } catch (Exception e) {
             throw new LedgerException(e.getMessage());
         }

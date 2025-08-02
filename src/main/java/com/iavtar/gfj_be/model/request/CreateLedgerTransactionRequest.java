@@ -22,6 +22,9 @@ public class CreateLedgerTransactionRequest {
     @NotNull(message = "order id can not be null")
     private String orderId;
 
+    @NotNull(message = "transaction type can not be blank")
+    private String transactionType;
+
     @NotNull(message = "category can not be null")
     private String category;
 

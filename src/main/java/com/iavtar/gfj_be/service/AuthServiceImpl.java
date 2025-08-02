@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
                             .phoneNumber(appUser.get().getPhoneNumber()).roles(userRoles).dashboardTabs(userDashboards)
                             .token(jwtService.generateToken(appUser)).build(), HttpStatus.OK);
                 } else {
-                    return new ResponseEntity<>(ServiceResponse.builder().message("Account Locked Please Contact Admin!").build(), HttpStatus.OK);
+                    return new ResponseEntity<>(ServiceResponse.builder().message("Account Locked Please Contact Admin!").build(), HttpStatus.FORBIDDEN);
                 }
             } else {
                 return new ResponseEntity<>(ServiceResponse.builder().message("Invalid Credentials!").build(), HttpStatus.OK);

@@ -19,6 +19,7 @@ public class LedgerTransactionWithClientResponse {
     private BigDecimal amount;
     private String paymentMethod;
     private String orderId;
+    private String transactionType;
     private String category;
     private String reference;
     private Date createdAt;
@@ -60,4 +61,5 @@ public class LedgerTransactionWithClientResponse {
                 .country(client != null ? client.getCountry() : null)
                 .build();
     }
+
 } 

@@ -31,6 +31,8 @@ public class LedgerTransaction {
 
     private String orderId;
 
+    private String transactionType;
+
     private String category;
 
     private String reference;
