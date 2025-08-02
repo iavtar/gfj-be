@@ -40,6 +40,7 @@ public class LedgerServiceImpl implements LedgerService {
     @Autowired
     private QuotationRepository quotationRepository;
 
+    @Autowired
     private LedgerIdGeneratorService idGeneratorService;
 
     @Override
@@ -48,7 +49,6 @@ public class LedgerServiceImpl implements LedgerService {
             ledgerRespository.save(
                     LedgerTransaction.builder()
                             .transactionId(idGeneratorService.generateId())
-                            .clientId(request.getClientId())
                             .amount(request.getAmount())
                             .paymentMethod(request.getPaymentMethod())
                             .orderId(request.getOrderId())
@@ -77,32 +77,43 @@ public class LedgerServiceImpl implements LedgerService {
             }
             Pageable pageable = PageRequest.of(offset / size, size, Sort.by(Sort.Direction.DESC, "createdAt"));
             Page<LedgerTransaction> page = ledgerRespository.findAll(pageable);            
-            List<Long> clientIds = page.getContent().stream()
-                    .map(LedgerTransaction::getClientId)
-                    .distinct()
-                    .collect(Collectors.toList());            
-            Map<Long, Client> clientMap = clientRepository.findAllById(clientIds).stream()
-                    .collect(Collectors.toMap(Client::getId, client -> client));
             
             List<LedgerTransactionWithClientResponse> transactionsWithClient = page.getContent().stream()
                     .map(transaction -> {
-                        Client client = clientMap.get(transaction.getClientId());
+                        Client client = null;
                         
-                        // Always populate description from quotation if reference exists
+                        // Get quotation and client information if reference exists
                         if (transaction.getReference() != null && !transaction.getReference().trim().isEmpty()) {
                             log.debug("Looking up quotation with quotationId: {}", transaction.getReference());
                             Optional<Quotation> quotation = quotationRepository.findByQuotationId(transaction.getReference());
-                            if (quotation.isPresent() && quotation.get().getDescription() != null && !quotation.get().getDescription().trim().isEmpty()) {
-                                log.debug("Found quotation description: {}", quotation.get().getDescription());
-                                transaction.setDescription(quotation.get().getDescription());
+                            if (quotation.isPresent()) {
+                                // Get client information from quotation's clientId
+                                if (quotation.get().getClientId() != null) {
+                                    Optional<Client> clientOptional = clientRepository.findById(quotation.get().getClientId());
+                                    if (clientOptional.isPresent()) {
+                                        client = clientOptional.get();
+                                        log.debug("Found client from quotation: {}", client.getClientName());
+                                    } else {
+                                        log.debug("Client not found for clientId: {}", quotation.get().getClientId());
+                                    }
+                                } else {
+                                    log.debug("Quotation has no clientId for reference: {}", transaction.getReference());
+                                }
+                                
+                                // Set description from quotation
+                                if (quotation.get().getDescription() != null && !quotation.get().getDescription().trim().isEmpty()) {
+                                    log.debug("Found quotation description: {}", quotation.get().getDescription());
+                                    transaction.setDescription(quotation.get().getDescription());
+                                } else {
+                                    log.debug("No description found in quotation for reference: {}", transaction.getReference());
+                                    transaction.setDescription("Transaction for quotation: " + transaction.getReference());
+                                }
                             } else {
-                                log.debug("No quotation found or quotation has no description for reference: {}", transaction.getReference());
-                                // Set a default description if quotation not found
+                                log.debug("No quotation found for reference: {}", transaction.getReference());
                                 transaction.setDescription("Transaction for quotation: " + transaction.getReference());
                             }
                         } else {
                             log.debug("No reference found for transaction: {}", transaction.getTransactionId());
-                            // Set a default description for transactions without reference
                             transaction.setDescription("General transaction");
                         }
                         

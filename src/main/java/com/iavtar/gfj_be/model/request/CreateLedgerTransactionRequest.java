@@ -10,9 +10,6 @@ import java.math.BigDecimal;
 @Setter
 public class CreateLedgerTransactionRequest {
 
-    @NotNull(message = "Client Id can not be null")
-    private Long clientId;
-
     @NotNull(message = "amount can not be null")
     private BigDecimal amount;
 
