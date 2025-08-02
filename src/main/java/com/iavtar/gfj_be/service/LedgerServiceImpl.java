@@ -2,6 +2,7 @@ package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.entity.LedgerTransaction;
+import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.exception.LedgerException;
 import com.iavtar.gfj_be.model.request.CreateLedgerTransactionRequest;
 import com.iavtar.gfj_be.model.request.UpdateLedgerTransactionRequest;
@@ -10,6 +11,7 @@ import com.iavtar.gfj_be.model.response.PagedLedgerTransactionWithClientResponse
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.repository.ClientRepository;
 import com.iavtar.gfj_be.repository.LedgerRespository;
+import com.iavtar.gfj_be.repository.QuotationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,14 +38,16 @@ public class LedgerServiceImpl implements LedgerService {
     private ClientRepository clientRepository;
 
     @Autowired
-    private LedegrIdGeneratorService ledegrIdGeneratorService;
+    private QuotationRepository quotationRepository;
+
+    private LedgerIdGeneratorService idGeneratorService;
 
     @Override
     public ResponseEntity<?> createLedgerTransaction(CreateLedgerTransactionRequest request) {
         try {
             ledgerRespository.save(
                     LedgerTransaction.builder()
-                            .transactionId(ledegrIdGeneratorService.generateId())
+                            .transactionId(idGeneratorService.generateId())
                             .clientId(request.getClientId())
                             .amount(request.getAmount())
                             .paymentMethod(request.getPaymentMethod())
@@ -51,7 +56,6 @@ public class LedgerServiceImpl implements LedgerService {
                             .reference(request.getReference())
                             .paymentStatus(request.getPaymentStatus())
                             .note(request.getNote())
-                            .description(request.getDescription())
                             .build()
             );
             return new ResponseEntity<>(ServiceResponse.builder()
@@ -78,10 +82,30 @@ public class LedgerServiceImpl implements LedgerService {
                     .distinct()
                     .collect(Collectors.toList());            
             Map<Long, Client> clientMap = clientRepository.findAllById(clientIds).stream()
-                    .collect(Collectors.toMap(Client::getId, client -> client));            
+                    .collect(Collectors.toMap(Client::getId, client -> client));
+            
             List<LedgerTransactionWithClientResponse> transactionsWithClient = page.getContent().stream()
                     .map(transaction -> {
                         Client client = clientMap.get(transaction.getClientId());
+                        
+                        // Always populate description from quotation if reference exists
+                        if (transaction.getReference() != null && !transaction.getReference().trim().isEmpty()) {
+                            log.debug("Looking up quotation with quotationId: {}", transaction.getReference());
+                            Optional<Quotation> quotation = quotationRepository.findByQuotationId(transaction.getReference());
+                            if (quotation.isPresent() && quotation.get().getDescription() != null && !quotation.get().getDescription().trim().isEmpty()) {
+                                log.debug("Found quotation description: {}", quotation.get().getDescription());
+                                transaction.setDescription(quotation.get().getDescription());
+                            } else {
+                                log.debug("No quotation found or quotation has no description for reference: {}", transaction.getReference());
+                                // Set a default description if quotation not found
+                                transaction.setDescription("Transaction for quotation: " + transaction.getReference());
+                            }
+                        } else {
+                            log.debug("No reference found for transaction: {}", transaction.getTransactionId());
+                            // Set a default description for transactions without reference
+                            transaction.setDescription("General transaction");
+                        }
+                        
                         return LedgerTransactionWithClientResponse.from(transaction, client);
                     })
                     .collect(Collectors.toList());            
@@ -123,9 +147,6 @@ public class LedgerServiceImpl implements LedgerService {
             }
             if (request.getNote() != null) {
                 existingTransaction.setNote(request.getNote());
-            }
-            if (request.getDescription() != null) {
-                existingTransaction.setDescription(request.getDescription());
             }
             LedgerTransaction updatedTransaction = ledgerRespository.save(existingTransaction);
             log.info("Successfully updated ledger transaction with transactionId: {}", transactionId);

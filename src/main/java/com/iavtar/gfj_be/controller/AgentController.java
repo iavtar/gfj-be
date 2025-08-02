@@ -121,7 +121,7 @@ public class AgentController {
             log.info("Creating quotation for agent: {}", request.getId());
             Quotation createdQuotation = quotationService.createQuotation(request);
             log.info("Quotation created successfully with ID: {}", createdQuotation.getId());
-            return ResponseEntity.ok(QuotationCreationResponse.builder().quotationId(createdQuotation.getId()).build());
+            return ResponseEntity.ok(QuotationCreationResponse.builder().quotationId(createdQuotation.getQuotationId()).build());
         } catch (Exception e) {
             log.error("Error creating quotation: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating quotation").build();
@@ -145,7 +145,7 @@ public class AgentController {
     }
 
     @DeleteMapping("/deleteQuotation")
-    public ResponseEntity<?> deleteQuotation(@RequestParam("quotationId") Long quotationId) {
+    public ResponseEntity<?> deleteQuotation(@RequestParam("quotationId") String quotationId) {
         try {
             log.info("Deleting quotation for agent: {}", quotationId);
             quotationService.deleteQuotation(quotationId);
@@ -232,7 +232,7 @@ public class AgentController {
     }
 
     @PostMapping("/quotation/upload")
-    public ResponseEntity<?> uploadQuotationImage(@RequestParam("file") MultipartFile file, @RequestParam("quotationId") Long quotationId) {
+    public ResponseEntity<?> uploadQuotationImage(@RequestParam("file") MultipartFile file, @RequestParam("quotationId") String quotationId) {
         try {
             return quotationService.uploadQuotationImage(file, quotationId);
         } catch (Exception e) {

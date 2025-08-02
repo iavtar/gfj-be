@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 public class QuotationCreationResponse {
 
-    private Long quotationId;
+    private String quotationId;
 
 }

@@ -36,7 +36,4 @@ public class CreateLedgerTransactionRequest {
 
     private String note;
 
-    @NotNull(message = "description can not be null")
-    private String description;
-
 }

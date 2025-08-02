@@ -25,6 +25,4 @@ public class UpdateLedgerTransactionRequest {
 
     private String note;
 
-    private String description;
-
 } 

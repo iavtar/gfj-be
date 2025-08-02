@@ -23,6 +23,8 @@ public class Quotation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String quotationId;
+
     private String description;
 
     @Lob

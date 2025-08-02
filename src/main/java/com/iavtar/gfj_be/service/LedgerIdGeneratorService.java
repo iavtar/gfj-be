@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
-public class LedegrIdGeneratorService {
+public class LedgerIdGeneratorService {
 
     private static final String PREFIX = "GFJ";
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd");
