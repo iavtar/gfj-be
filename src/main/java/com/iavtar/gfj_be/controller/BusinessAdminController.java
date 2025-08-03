@@ -177,7 +177,7 @@ public class BusinessAdminController {
     }
 
     @DeleteMapping("/deleteClient/{clientId}")
-    public ResponseEntity<?> deleteClient(@RequestBody Long clientId) {
+    public ResponseEntity<?> deleteClient(@PathVariable Long clientId) {
         try {
             bussinessAdminService.deleteClient(clientId);
             ServiceResponse response = ServiceResponse.builder().message("Client deleted successfully").build();
