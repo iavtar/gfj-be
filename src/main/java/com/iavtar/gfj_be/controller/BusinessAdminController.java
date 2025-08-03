@@ -3,6 +3,7 @@ package com.iavtar.gfj_be.controller;
 import com.iavtar.gfj_be.entity.AppUser;
 import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.entity.Material;
+import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.model.request.AppUserRequest;
 import com.iavtar.gfj_be.model.request.ClientRequest;
 import com.iavtar.gfj_be.model.response.ClientResponse;
@@ -12,6 +13,7 @@ import com.iavtar.gfj_be.repository.MaterialRepository;
 import com.iavtar.gfj_be.service.AgentService;
 import com.iavtar.gfj_be.service.BussinessAdminService;
 import com.iavtar.gfj_be.service.MaterialService;
+import com.iavtar.gfj_be.service.QuotationService;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class BusinessAdminController {
 
     @Autowired
     private MaterialRepository materialRepository;
+
+    @Autowired
+    private QuotationService quotationService;
 
     @PostMapping("/agent")
     public ResponseEntity<?> createAgent(@RequestBody AppUserRequest request) {
@@ -242,6 +247,21 @@ public class BusinessAdminController {
         } catch (IllegalArgumentException e) {
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error deleting material : " + material.getTitle()).build();
             return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/quotations")
+    public ResponseEntity<?> getAllQuotations(@RequestParam(defaultValue = "0") int offset, 
+                                             @RequestParam(defaultValue = "10") int size,
+                                             @RequestParam(defaultValue = "id") String sortBy) {
+        try {
+            log.info("Getting all quotations with pagination: offset={}, size={}, sortBy={}", offset, size, sortBy);
+            PagedUserResponse<Quotation> response = quotationService.findAllQuotations(offset, size, sortBy);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error getting all quotations: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error getting all quotations").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 

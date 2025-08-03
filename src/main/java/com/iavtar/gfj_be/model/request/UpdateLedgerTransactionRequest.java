@@ -9,15 +9,15 @@ import java.math.BigDecimal;
 @Setter
 public class UpdateLedgerTransactionRequest {
 
-    private Long clientId;
+    private String transactionType;
+
+    private String category;
 
     private BigDecimal amount;
 
     private String paymentMethod;
 
     private String orderId;
-
-    private String category;
 
     private String reference;
 

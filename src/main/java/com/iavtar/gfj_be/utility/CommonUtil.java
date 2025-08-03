@@ -237,5 +237,15 @@ public class CommonUtil {
         return PagedUserResponse.from(quotationPage, offset, size);
     }
 
+    public PagedUserResponse<Quotation> findAllQuotations(int offset, int size, String sortBy) {
+        log.debug("Finding all quotations with offset: offset={}, size={}, sortBy={}", offset, size, sortBy);
+        int page = offset / size;
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Quotation> quotationPage = quotationRepository.findAll(pageable);
+        log.info("Found {} quotations at offset {} with {} total records", quotationPage.getNumberOfElements(), offset, quotationPage.getTotalElements());
+        return PagedUserResponse.from(quotationPage, offset, size);
+    }
+
 
 }

@@ -111,6 +111,11 @@ public class QuotationService {
         return commonUtil.findAllQuotationsByClientAndAgent(clientId, agentId, offset, size, sortBy);
     }
 
+    public PagedUserResponse<Quotation> findAllQuotations(int offset, int size, String sortBy) {
+        log.info("Getting all quotations with pagination: offset={}, size={}, sortBy={}", offset, size, sortBy);
+        return commonUtil.findAllQuotations(offset, size, sortBy);
+    }
+
     public ResponseEntity<?> uploadQuotationImage(MultipartFile file, String quotationId) {
         try {
             String url = commonUtil.uploadFile(file, quotationId);

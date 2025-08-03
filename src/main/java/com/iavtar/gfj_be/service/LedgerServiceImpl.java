@@ -23,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -135,9 +134,6 @@ public class LedgerServiceImpl implements LedgerService {
         try {
             LedgerTransaction existingTransaction = ledgerRespository.findByTransactionId(transactionId)
                     .orElseThrow(() -> new LedgerException("Transaction not found with transactionId: " + transactionId));
-            if (request.getClientId() != null) {
-                existingTransaction.setClientId(request.getClientId());
-            }
             if (request.getAmount() != null) {
                 existingTransaction.setAmount(request.getAmount());
             }
