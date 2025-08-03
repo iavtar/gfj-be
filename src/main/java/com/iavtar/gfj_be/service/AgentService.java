@@ -4,10 +4,14 @@ import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.model.request.ClientRequest;
 import com.iavtar.gfj_be.model.response.ClientResponse;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
+import com.iavtar.gfj_be.model.response.ServiceResponse;
+import com.iavtar.gfj_be.repository.AppUserRepository;
 import com.iavtar.gfj_be.repository.ClientRepository;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -16,6 +20,9 @@ public class AgentService {
 
     @Autowired
     private ClientRepository clientRepository;
+
+    @Autowired
+    private AppUserRepository userRepository;
 
     @Autowired
     private CommonUtil commonUtil;
@@ -128,6 +135,20 @@ public class AgentService {
         Client updatedClient = clientRepository.save(existingClient);
         log.info("Client updated successfully with ID: {}", updatedClient.getId());
         return updatedClient;
+    }
+
+    public ResponseEntity<?> deleteAgent(Long agentId) {
+        try {
+            userRepository.deleteById(agentId);
+            return new ResponseEntity<>(
+                    ServiceResponse.builder()
+                            .message("Agent Deleted Successfully!")
+                            .build(),
+                    HttpStatus.OK
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
 }

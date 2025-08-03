@@ -194,12 +194,16 @@ public class CommonUtil {
     }
 
     @Transactional
-    public String uploadFile(MultipartFile file, Long quotationId) throws IOException {
-        var quotation = quotationRepository.findById(quotationId)
-                .orElseThrow(() -> new IllegalArgumentException("Quotation not found with ID: " + quotationId));
+    public String uploadFile(MultipartFile file, String quotationId) throws IOException {
+        Optional<Quotation> existingQuotationOptional = quotationRepository.findByQuotationId(quotationId);
+        if (existingQuotationOptional.isEmpty()) {
+            log.info("Quotation with quotationId {} not found", quotationId);
+            throw new IllegalArgumentException("Quotation with quotationId " + quotationId + " not found");
+        }
+        Quotation existingQuotation = existingQuotationOptional.get();
         String url = s3Util.uploadFile(file, "quotations");
-        quotation.setImageUrl(url);
-        quotationRepository.save(quotation);
+        existingQuotation.setImageUrl(url);
+        quotationRepository.save(existingQuotation);
         return url;
     }
 
@@ -230,6 +234,16 @@ public class CommonUtil {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Quotation> quotationPage = quotationRepository.findAllByClientIdAndAgentId(clientId, agentId, pageable);
         log.info("Found {} quotations for client: {} and agent: {}", quotationPage.getNumberOfElements(), clientId, agentId);
+        return PagedUserResponse.from(quotationPage, offset, size);
+    }
+
+    public PagedUserResponse<Quotation> findAllQuotations(int offset, int size, String sortBy) {
+        log.debug("Finding all quotations with offset: offset={}, size={}, sortBy={}", offset, size, sortBy);
+        int page = offset / size;
+        Sort sort = Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Quotation> quotationPage = quotationRepository.findAll(pageable);
+        log.info("Found {} quotations at offset {} with {} total records", quotationPage.getNumberOfElements(), offset, quotationPage.getTotalElements());
         return PagedUserResponse.from(quotationPage, offset, size);
     }
 
