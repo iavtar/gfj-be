@@ -96,6 +96,11 @@ public class BusinessAdminController {
         }
     }
 
+    @DeleteMapping("/deleteAgent/{agentId}")
+    public ResponseEntity<?> deleteAgent(@PathVariable Long agentId) {
+        return agentService.deleteAgent(agentId);
+    }
+
     @GetMapping("/clients")
     public ResponseEntity<?> getAllClients(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int size,
                                            @RequestParam(defaultValue = "id") String sortBy) {
@@ -171,16 +176,10 @@ public class BusinessAdminController {
         }
     }
 
-    @DeleteMapping("/deleteClient")
-    public ResponseEntity<?> deleteClient(@RequestBody ClientRequest request) {
+    @DeleteMapping("/deleteClient/{clientId}")
+    public ResponseEntity<?> deleteClient(@RequestBody Long clientId) {
         try {
-            log.info("Deleting client with ID: {}", request.getId());
-            if (request.getId() == null) {
-                ServiceResponse errorResponse = ServiceResponse.builder().message("Client ID is required for delete").build();
-                return ResponseEntity.badRequest().body(errorResponse);
-            }
-            bussinessAdminService.deleteClient(request.getId());
-            log.info("Client deleted successfully with ID: {}", request.getId());
+            bussinessAdminService.deleteClient(clientId);
             ServiceResponse response = ServiceResponse.builder().message("Client deleted successfully").build();
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
