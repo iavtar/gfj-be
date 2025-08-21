@@ -3,12 +3,12 @@ package com.iavtar.gfj_be.service;
 import com.iavtar.gfj_be.model.request.AddUpdateShippingItemRequest;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface ShippingService {
-    ResponseEntity<?> addShippingItem(AddUpdateShippingItemRequest request);
+    ResponseEntity<?> markQuotationsForShipping(List<String> quotations);
 
-    ResponseEntity<?> updateShippingItem(String shippingId, AddUpdateShippingItemRequest request);
+    ResponseEntity<?> getAllShipping(int offset, int size);
 
-    ResponseEntity<?> deleteShippingItem(String shippingId);
-
-    ResponseEntity<?> getAllShippingItems();
+    ResponseEntity<?> addTrackingId(String shippingId, String trackingId);
 }

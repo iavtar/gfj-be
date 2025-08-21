@@ -24,8 +24,6 @@ public class ShippingTracker {
 
     private String trackingId;
 
-    private String quotationId;
-
     private String status;
 
     private Date createdAt;

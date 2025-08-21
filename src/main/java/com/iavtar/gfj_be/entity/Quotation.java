@@ -54,4 +54,6 @@ public class Quotation {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    private String shippingId;
+
 }

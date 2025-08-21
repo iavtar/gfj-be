@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/shipping")
@@ -15,25 +17,21 @@ public class ShippingController {
     @Autowired
     private ShippingService shippingService;
 
-    @PostMapping("/addShippingItem")
-    public ResponseEntity<?> addShippingItem(@RequestBody AddUpdateShippingItemRequest request) {
-        return shippingService.addShippingItem(request);
+    @PostMapping("/markForShipping")
+    public ResponseEntity<?> markQuotationsForShipping(@RequestBody List<String> quotations) {
+        return shippingService.markQuotationsForShipping(quotations);
     }
 
-    @PutMapping("updateShippingItem/{shippingId}")
-    public ResponseEntity<?> updateShippingItem(@PathVariable String shippingId,
-                                                @RequestBody AddUpdateShippingItemRequest request) {
-        return shippingService.updateShippingItem(shippingId, request);
+    @GetMapping("/allShipping")
+    public ResponseEntity<?> getAllShipping(@RequestParam(defaultValue = "0") int offset,
+                                            @RequestParam(defaultValue = "10") int size) {
+        return shippingService.getAllShipping(offset, size);
     }
 
-    @DeleteMapping("deleteShippingItem/{shippingId}")
-    public ResponseEntity<?> deleteShippingItem(@PathVariable String shippingId) {
-        return shippingService.deleteShippingItem(shippingId);
-    }
-
-    @GetMapping("/getAllShippingItems")
-    public ResponseEntity<?> getAllShippingItems() {
-        return shippingService.getAllShippingItems();
+    @PostMapping("/addTrackingId")
+    public ResponseEntity<?> addTrackingId(@RequestParam String shippingId, 
+                                          @RequestParam String trackingId) {
+        return shippingService.addTrackingId(shippingId, trackingId);
     }
 
 }

@@ -11,7 +11,4 @@ public interface ShippingServiceRepository extends JpaRepository<ShippingTracker
     
     Optional<ShippingTracker> findByShippingId(String shippingId);
     
-    Optional<ShippingTracker> findByTrackingId(String trackingId);
-    
-    Optional<ShippingTracker> findByQuotationId(String quotationId);
 }
