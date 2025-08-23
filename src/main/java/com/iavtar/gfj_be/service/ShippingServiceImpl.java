@@ -2,6 +2,7 @@ package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.entity.ShippingTracker;
+import com.iavtar.gfj_be.model.request.UpdateShippingTrackingRequest;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.repository.ClientRepository;
 import com.iavtar.gfj_be.repository.QuotationRepository;
@@ -62,7 +63,6 @@ public class ShippingServiceImpl implements ShippingService {
                     .collect(Collectors.toList());
             Map<String, List<Quotation>> grouped = shippableQuotations.stream()
                     .collect(Collectors.groupingBy(Quotation::getShippingId));
-            // Preload shipping tracker statuses by shippingId
             Map<String, String> shippingStatusById = shippingRepository.findAll().stream()
                     .collect(Collectors.toMap(ShippingTracker::getShippingId, ShippingTracker::getStatus, (a, b) -> a));
             List<Map<String, Object>> shippingGroups = grouped.entrySet().stream()
@@ -130,6 +130,22 @@ public class ShippingServiceImpl implements ShippingService {
                     .message("Error adding tracking ID: " + exception.getMessage())
                     .build();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updateTrackingStatus(UpdateShippingTrackingRequest request) {
+        try {
+            Optional<ShippingTracker> shippingTracker = shippingRepository.findByShippingId(request.getShippingId());
+            if(shippingTracker.isPresent()) {
+                ShippingTracker st = shippingTracker.get();
+                st.setStatus(request.getStatus());
+                shippingRepository.save(st);
+                return new ResponseEntity<>(ServiceResponse.builder().message("Shipping Status Updated!").build(), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(ServiceResponse.builder().message("Shipping Status Not Updated!").build(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage());
         }
     }
 

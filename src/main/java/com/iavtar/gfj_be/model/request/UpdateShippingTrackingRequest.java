@@ -5,12 +5,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AddUpdateShippingItemRequest {
+public class UpdateShippingTrackingRequest {
 
     private String shippingId;
 
-    private String trackingId;
-
-    private String quotationId;
+    private String status;
 
 }

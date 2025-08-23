@@ -1,6 +1,6 @@
 package com.iavtar.gfj_be.controller;
 
-import com.iavtar.gfj_be.model.request.AddUpdateShippingItemRequest;
+import com.iavtar.gfj_be.model.request.UpdateShippingTrackingRequest;
 import com.iavtar.gfj_be.service.ShippingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +32,11 @@ public class ShippingController {
     public ResponseEntity<?> addTrackingId(@RequestParam String shippingId, 
                                           @RequestParam String trackingId) {
         return shippingService.addTrackingId(shippingId, trackingId);
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<?> updateTrackingStatus(@RequestBody UpdateShippingTrackingRequest request) {
+        return shippingService.updateTrackingStatus(request);
     }
 
 }
