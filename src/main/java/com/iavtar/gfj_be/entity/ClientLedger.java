@@ -12,48 +12,46 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "quotation")
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "client_ledger")
 @Data
-public class Quotation {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ClientLedger {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String quotationId;
-
-    private String description;
-
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String data;
-
-    @Column
-    private BigDecimal price;
-
-    @Column
-    private Long agentId;
-
-    @Column
+    @Column(nullable = false)
     private Long clientId;
 
-    @Column
-    private String quotationStatus;
+    @Column(nullable = false)
+    private String transactionId;
+
+    @Column(nullable = false)
+    private BigDecimal amount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionType transactionType;
+
+    @Column(nullable = false)
+    private String description;
 
     @Column
-    private String imageUrl;
+    private String reference;
 
-    @Column(updatable = false)
+    @Column
+    private String note;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    private String shippingId;
-
+    public enum TransactionType {
+        CREDIT, DEBIT
+    }
 }
