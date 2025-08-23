@@ -60,11 +60,13 @@ public class ShippingServiceImpl implements ShippingService {
             List<Quotation> quotations = quotationRepository.findAll();
             List<Quotation> shippableQuotations = quotations.stream()
                     .filter(quotation -> Objects.nonNull(quotation.getShippingId()))
-                    .collect(Collectors.toList());
+                    .toList();
             Map<String, List<Quotation>> grouped = shippableQuotations.stream()
                     .collect(Collectors.groupingBy(Quotation::getShippingId));
             Map<String, String> shippingStatusById = shippingRepository.findAll().stream()
                     .collect(Collectors.toMap(ShippingTracker::getShippingId, ShippingTracker::getStatus, (a, b) -> a));
+            Map<String, String> trackingId = shippingRepository.findAll().stream()
+                    .collect(Collectors.toMap(ShippingTracker::getTrackingId, ShippingTracker::getTrackingId, (a, b) -> a));
             List<Map<String, Object>> shippingGroups = grouped.entrySet().stream()
                     .map(entry -> {
                         Map<String, Object> item = new HashMap<>();
@@ -72,6 +74,7 @@ public class ShippingServiceImpl implements ShippingService {
                         item.put("quotations", entry.getValue());
                         item.put("count", entry.getValue().size());
                         item.put("status", shippingStatusById.get(entry.getKey()));
+                        item.put("trackingId", trackingId.get(entry.getKey()));
                         return item;
                     })
                     .collect(Collectors.toList());
