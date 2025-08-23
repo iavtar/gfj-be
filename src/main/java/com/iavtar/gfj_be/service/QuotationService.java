@@ -34,7 +34,7 @@ public class QuotationService {
                         .data(quotation.getData())
                         .price(quotation.getPrice())
                         .agentId(quotation.getAgentId())
-                .clientId(quotation.getClientId())
+                        .clientId(quotation.getClientId())
                         .quotationStatus(quotation.getQuotationStatus())
                         .updatedAt(LocalDateTime.now())
                         .build());
