@@ -20,28 +20,33 @@ pipeline {
                 sh 'mvn clean install -DskipTests=true'
             }
         }
-		
+
         stage('Deploy') {
             steps {
-                sshagent(credentials: ['ec2-creds']) {
-                    sh """
-                        scp target/${JAR_NAME} ${EC2_INSTANCE_USER}@${EC2_INSTANCE_IP}:${DEPLOY_PATH}
-						
-                        scp start-gfj.sh ${EC2_INSTANCE_USER}@${EC2_INSTANCE_IP}:${DEPLOY_PATH}/                    
-                        
-                        # Connect to the EC2 instance via SSH to run deployment commands.
-                        ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE_USER}@${EC2_INSTANCE_IP} <<EOF
-                            echo "Stopping any existing application process..."
-                            pkill -f "${JAR_NAME}" || true
-                            
-                            # Give the script execute permissions if it doesn't have them.
-                            chmod +x ${DEPLOY_PATH}/start-gfj.sh
-                            
-                            echo "Starting the new application using the start script..."
-                            # Use nohup to run the script in the background.
-                            nohup bash ${DEPLOY_PATH}/start-gfj.sh &
-                        EOF
-                    """
+                withCredentials([file(credentialsId: 'start-gfj-script', variable: 'START_SCRIPT_PATH')]) {
+                    sshagent(credentials: ['ec2-creds']) {
+                        sh """
+                            echo "Copying application files to EC2 instance..."
+
+                            scp target/${JAR_NAME} ${EC2_INSTANCE_USER}@${EC2_INSTANCE_IP}:${DEPLOY_PATH}/
+
+                            scp ${START_SCRIPT_PATH} ${EC2_INSTANCE_USER}@${EC2_INSTANCE_IP}:${DEPLOY_PATH}/start-gfj.sh
+
+                            echo "Connecting to EC2 instance and restarting application..."
+                            ssh -o StrictHostKeyChecking=no ${EC2_INSTANCE_USER}@${EC2_INSTANCE_IP} <<EOF
+                                echo "Stopping any existing application process..."
+
+                                pkill -f "${JAR_NAME}" || true
+
+                                # Give the script execute permissions.
+                                chmod +x ${DEPLOY_PATH}/start-gfj.sh
+
+                                echo "Starting the new application using the start script..."
+                                # Use nohup to run the script in the background.
+                                nohup bash ${DEPLOY_PATH}/start-gfj.sh &
+                            EOF
+                        """
+                    }
                 }
             }
         }
