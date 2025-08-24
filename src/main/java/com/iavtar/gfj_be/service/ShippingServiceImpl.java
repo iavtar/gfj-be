@@ -158,6 +158,7 @@ public class ShippingServiceImpl implements ShippingService {
                 List<Quotation> quotations = quotationRepository.findAllByShippingId(request.getShippingId());
                 quotations.forEach(quotation -> {
                     quotation.setQuotationStatus(request.getStatus());
+                    quotationRepository.save(quotation);
                 });
                 return new ResponseEntity<>(ServiceResponse.builder().message("Shipping Status Updated!").build(), HttpStatus.OK);
             }
