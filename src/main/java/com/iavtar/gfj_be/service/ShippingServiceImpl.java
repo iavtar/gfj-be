@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
 
 @Slf4j
@@ -63,10 +64,15 @@ public class ShippingServiceImpl implements ShippingService {
                     .toList();
             Map<String, List<Quotation>> grouped = shippableQuotations.stream()
                     .collect(Collectors.groupingBy(Quotation::getShippingId));
-            Map<String, String> shippingStatusById = shippingRepository.findAll().stream()
+            List<ShippingTracker> shippingTrackers = shippingRepository.findAll();
+            Map<String, String> shippingStatusById = shippingTrackers.stream()
                     .collect(Collectors.toMap(ShippingTracker::getShippingId, ShippingTracker::getStatus, (a, b) -> a));
-            Map<String, String> trackingId = shippingRepository.findAll().stream()
-                    .collect(Collectors.toMap(ShippingTracker::getTrackingId, ShippingTracker::getTrackingId, (a, b) -> a));
+            Map<String, String> shippingTrackingIdById = shippingTrackers.stream()
+                    .collect(Collectors.toMap(
+                            ShippingTracker::getShippingId,
+                            st -> st.getTrackingId() != null ? st.getTrackingId() : "",
+                            (a, b) -> a
+                    ));
             List<Map<String, Object>> shippingGroups = grouped.entrySet().stream()
                     .map(entry -> {
                         Map<String, Object> item = new HashMap<>();
@@ -74,7 +80,7 @@ public class ShippingServiceImpl implements ShippingService {
                         item.put("quotations", entry.getValue());
                         item.put("count", entry.getValue().size());
                         item.put("status", shippingStatusById.get(entry.getKey()));
-                        item.put("trackingId", trackingId.get(entry.getKey()));
+                        item.put("trackingId", shippingTrackingIdById.get(entry.getKey())); // can be null
                         return item;
                     })
                     .collect(Collectors.toList());
@@ -140,7 +146,7 @@ public class ShippingServiceImpl implements ShippingService {
     public ResponseEntity<?> updateTrackingStatus(UpdateShippingTrackingRequest request) {
         try {
             Optional<ShippingTracker> shippingTracker = shippingRepository.findByShippingId(request.getShippingId());
-            if(shippingTracker.isPresent()) {
+            if (shippingTracker.isPresent()) {
                 ShippingTracker st = shippingTracker.get();
                 st.setStatus(request.getStatus());
                 shippingRepository.save(st);
