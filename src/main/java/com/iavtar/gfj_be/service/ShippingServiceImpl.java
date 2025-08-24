@@ -128,6 +128,11 @@ public class ShippingServiceImpl implements ShippingService {
             shippingTracker.setTrackingId(trackingId);
             shippingTracker.setStatus("shipped");
             shippingRepository.save(shippingTracker);
+            List<Quotation> quotations = quotationRepository.findAllByShippingId();
+            quotations.forEach(quotation -> {
+                quotation.setQuotationStatus("shipped");
+                quotationRepository.save(quotation);
+            });
             log.info("Successfully set tracking ID {} on shipping tracker: {}", trackingId, shippingId);
             ServiceResponse response = ServiceResponse.builder()
                     .message("Tracking ID added successfully")
@@ -150,6 +155,10 @@ public class ShippingServiceImpl implements ShippingService {
                 ShippingTracker st = shippingTracker.get();
                 st.setStatus(request.getStatus());
                 shippingRepository.save(st);
+                List<Quotation> quotations = quotationRepository.findAllByShippingId();
+                quotations.forEach(quotation -> {
+                    quotation.setQuotationStatus(request.getStatus());
+                });
                 return new ResponseEntity<>(ServiceResponse.builder().message("Shipping Status Updated!").build(), HttpStatus.OK);
             }
             return new ResponseEntity<>(ServiceResponse.builder().message("Shipping Status Not Updated!").build(), HttpStatus.BAD_REQUEST);
