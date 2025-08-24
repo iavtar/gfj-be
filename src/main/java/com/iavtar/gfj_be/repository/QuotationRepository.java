@@ -22,5 +22,5 @@ public interface QuotationRepository extends JpaRepository<Quotation, Long> {
 
     Optional<Quotation> findByQuotationId(String quotationId);
 
-    List<Quotation> findAllByShippingId();
+    List<Quotation> findAllByShippingId(String shippingId);
 }

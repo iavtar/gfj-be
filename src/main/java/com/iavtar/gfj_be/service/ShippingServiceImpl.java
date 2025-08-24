@@ -128,7 +128,7 @@ public class ShippingServiceImpl implements ShippingService {
             shippingTracker.setTrackingId(trackingId);
             shippingTracker.setStatus("shipped");
             shippingRepository.save(shippingTracker);
-            List<Quotation> quotations = quotationRepository.findAllByShippingId();
+            List<Quotation> quotations = quotationRepository.findAllByShippingId(shippingId);
             quotations.forEach(quotation -> {
                 quotation.setQuotationStatus("shipped");
                 quotationRepository.save(quotation);
@@ -155,7 +155,7 @@ public class ShippingServiceImpl implements ShippingService {
                 ShippingTracker st = shippingTracker.get();
                 st.setStatus(request.getStatus());
                 shippingRepository.save(st);
-                List<Quotation> quotations = quotationRepository.findAllByShippingId();
+                List<Quotation> quotations = quotationRepository.findAllByShippingId(request.getShippingId());
                 quotations.forEach(quotation -> {
                     quotation.setQuotationStatus(request.getStatus());
                 });
