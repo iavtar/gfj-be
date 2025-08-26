@@ -194,17 +194,8 @@ public class CommonUtil {
     }
 
     @Transactional
-    public String uploadFile(MultipartFile file, String quotationId) throws IOException {
-        Optional<Quotation> existingQuotationOptional = quotationRepository.findByQuotationId(quotationId);
-        if (existingQuotationOptional.isEmpty()) {
-            log.info("Quotation with quotationId {} not found", quotationId);
-            throw new IllegalArgumentException("Quotation with quotationId " + quotationId + " not found");
-        }
-        Quotation existingQuotation = existingQuotationOptional.get();
-        String url = s3Util.uploadFile(file, "quotations");
-        existingQuotation.setImageUrl(url);
-        quotationRepository.save(existingQuotation);
-        return url;
+    public String uploadFile(MultipartFile file) throws IOException {
+        return s3Util.uploadFile(file, "quotations");
     }
 
     public PagedUserResponse<Quotation> findAllQuotationsByClient(Long clientId, int offset, int size, String sortBy) {

@@ -45,6 +45,9 @@ public class ShippingServiceImpl implements ShippingService {
             quotations.forEach(quotation -> quotationRepository.findByQuotationId(quotation)
                     .ifPresent(qt -> {
                         qt.setShippingId(shippingId);
+                        qt.getFinalQuotations().forEach(finalQuotation -> {
+                            finalQuotation.setShippingId(shippingId);
+                        });
                         quotationRepository.save(qt);
                     })
             );
