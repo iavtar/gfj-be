@@ -12,18 +12,20 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "quotation")
+@Table(name = "final_quotation")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Quotation {
+public class FinalQuotation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String quotationId;
+    private String mappedQuotationId;
+
+    private String finalQuotationId;
 
     private String description;
 

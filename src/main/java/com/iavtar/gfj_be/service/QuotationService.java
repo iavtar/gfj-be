@@ -1,8 +1,10 @@
 package com.iavtar.gfj_be.service;
 
+import com.iavtar.gfj_be.entity.FinalQuotation;
 import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
+import com.iavtar.gfj_be.repository.FinalQuotationRepository;
 import com.iavtar.gfj_be.repository.QuotationRepository;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,9 @@ public class QuotationService {
 
     @Autowired
     private QuotationIdGeneratorService idGeneratorService;
+
+    @Autowired
+    private FinalQuotationRepository finalQuotationRepository;
 
     public Quotation createQuotation(Quotation quotation) {
         return quotationRepository.save(
@@ -118,10 +123,65 @@ public class QuotationService {
 
     public ResponseEntity<?> uploadQuotationImage(MultipartFile file, String quotationId) {
         try {
-            String url = commonUtil.uploadFile(file, quotationId);
+            String url = commonUtil.uploadFile(file);
+            Optional<Quotation> existingQuotationOptional = quotationRepository.findByQuotationId(quotationId);
+            if (existingQuotationOptional.isEmpty()) {
+                log.info("Quotation with quotationId {} not found", quotationId);
+                throw new IllegalArgumentException("Quotation with quotationId " + quotationId + " not found");
+            }
+            Quotation existingQuotation = existingQuotationOptional.get();
+            existingQuotation.setImageUrl(url);
+            quotationRepository.save(existingQuotation);
             return ResponseEntity.ok(url);
         } catch (Exception e) {
             log.error("Error uploading quotations image: {}", e.getMessage(), e);
+            return new ResponseEntity<>(
+                    ServiceResponse.builder()
+                            .message("Error uploading quotations image")
+                            .build(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> createFinalQuotation(String quotationId) {
+        Optional<Quotation> existingQuotationOptional = quotationRepository.findByQuotationId(quotationId);
+        if (existingQuotationOptional.isEmpty()) {
+            log.info("Quotation with quotationId {} not found", quotationId);
+            throw new IllegalArgumentException("Quotation with quotationId " + quotationId + " not found");
+        }
+        Quotation quotation = existingQuotationOptional.get();
+        if(quotation.getQuotationStatus().equalsIgnoreCase("manufacturing complete")) {
+            finalQuotationRepository.save(
+                    FinalQuotation.builder()
+                            .mappedQuotationId(quotation.getQuotationId())
+                            .finalQuotationId(idGeneratorService.generateId())
+                            .description(quotation.getDescription())
+                            .data(quotation.getData())
+                            .price(quotation.getPrice())
+                            .agentId(quotation.getAgentId())
+                            .clientId(quotation.getClientId())
+                            .quotationStatus("final")
+                            .build()
+            );
+            return new ResponseEntity<>(ServiceResponse.builder().message("final quotation created").build(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(ServiceResponse.builder().build(), HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<?> uploadFinalQuotationImage(MultipartFile file, String quotationId) {
+        try {
+            String url = commonUtil.uploadFile(file);
+            Optional<FinalQuotation> existingQuotationOptional = finalQuotationRepository.findByFinalQuotationId(quotationId);
+            if (existingQuotationOptional.isEmpty()) {
+                log.info("Quotation with quotationId {} not found", quotationId);
+                throw new IllegalArgumentException("Quotation with quotationId " + quotationId + " not found");
+            }
+            FinalQuotation existingQuotation = existingQuotationOptional.get();
+            existingQuotation.setImageUrl(url);
+            finalQuotationRepository.save(existingQuotation);
+            return ResponseEntity.ok(url);
+        } catch (Exception e) {
+            log.error("Error uploading final quotations image: {}", e.getMessage(), e);
             return new ResponseEntity<>(
                     ServiceResponse.builder()
                             .message("Error uploading quotations image")

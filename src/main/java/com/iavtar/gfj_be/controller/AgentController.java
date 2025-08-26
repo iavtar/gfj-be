@@ -129,6 +129,20 @@ public class AgentController {
         }
     }
 
+    @PostMapping("/createFinalQuotation")
+    public ResponseEntity<?> createFinalQuotation(@RequestParam("quotationId") String quotationId) {
+        try {
+            log.info("Creating final quotation for quotation with ID: {}", quotationId);
+            ResponseEntity<?> createdQuotation = quotationService.createFinalQuotation(quotationId);
+            log.info("Created final Quotation successfully for quotation with ID: {}", quotationId);
+            return createdQuotation;
+        } catch (Exception e) {
+            log.error("Error creating quotation: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating final quotation").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
     @PostMapping("/updateQuotation")
     public ResponseEntity<?> updateQuotation(@RequestBody Quotation request) {
         try {
