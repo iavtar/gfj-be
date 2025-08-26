@@ -69,6 +69,9 @@ public class QuotationService {
         if (quotation.getQuotationStatus() != null) {
             existingQuotation.setQuotationStatus(quotation.getQuotationStatus());
         }
+        if(quotation.getDescription() != null) {
+            existingQuotation.setDescription(quotation.getDescription());
+        }
         existingQuotation.setUpdatedAt(LocalDateTime.now());
         return quotationRepository.save(existingQuotation);
     }
