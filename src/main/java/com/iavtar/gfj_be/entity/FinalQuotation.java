@@ -10,23 +10,23 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "quotation")
+@Table(name = "final_quotation")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Quotation {
+public class FinalQuotation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "quotation_id")
-    private String quotationId;
+    @Column(name = "mapped_quotation_id")
+    private String mappedQuotationId;
+
+    private String finalQuotationId;
 
     private String description;
 
@@ -60,9 +60,5 @@ public class Quotation {
     private String shippingId;
 
     private String trackingId;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "mapped_quotation_id", referencedColumnName = "quotation_id")
-    private List<FinalQuotation> finalQuotations = new ArrayList<>();
 
 }

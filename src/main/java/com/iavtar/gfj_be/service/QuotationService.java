@@ -1,8 +1,11 @@
 package com.iavtar.gfj_be.service;
 
+import com.iavtar.gfj_be.entity.FinalQuotation;
 import com.iavtar.gfj_be.entity.Quotation;
+import com.iavtar.gfj_be.model.request.UpdateFinalQuotationRequest;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
+import com.iavtar.gfj_be.repository.FinalQuotationRepository;
 import com.iavtar.gfj_be.repository.QuotationRepository;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,6 +29,9 @@ public class QuotationService {
 
     @Autowired
     private QuotationIdGeneratorService idGeneratorService;
+
+    @Autowired
+    private FinalQuotationRepository finalQuotationRepository;
 
     public Quotation createQuotation(Quotation quotation) {
         return quotationRepository.save(
@@ -59,8 +66,11 @@ public class QuotationService {
         if (quotation.getPrice() != null) {
             existingQuotation.setPrice(quotation.getPrice());
         }
-        if(quotation.getQuotationStatus() != null) {
+        if (quotation.getQuotationStatus() != null) {
             existingQuotation.setQuotationStatus(quotation.getQuotationStatus());
+        }
+        if (quotation.getDescription() != null) {
+            existingQuotation.setDescription(quotation.getDescription());
         }
         existingQuotation.setUpdatedAt(LocalDateTime.now());
         return quotationRepository.save(existingQuotation);
@@ -118,7 +128,15 @@ public class QuotationService {
 
     public ResponseEntity<?> uploadQuotationImage(MultipartFile file, String quotationId) {
         try {
-            String url = commonUtil.uploadFile(file, quotationId);
+            String url = commonUtil.uploadFile(file);
+            Optional<Quotation> existingQuotationOptional = quotationRepository.findByQuotationId(quotationId);
+            if (existingQuotationOptional.isEmpty()) {
+                log.info("Quotation with quotationId {} not found", quotationId);
+                throw new IllegalArgumentException("Quotation with quotationId " + quotationId + " not found");
+            }
+            Quotation existingQuotation = existingQuotationOptional.get();
+            existingQuotation.setImageUrl(url);
+            quotationRepository.save(existingQuotation);
             return ResponseEntity.ok(url);
         } catch (Exception e) {
             log.error("Error uploading quotations image: {}", e.getMessage(), e);
@@ -127,6 +145,92 @@ public class QuotationService {
                             .message("Error uploading quotations image")
                             .build(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> uploadFinalQuotationImage(MultipartFile file, String quotationId) {
+        try {
+            String url = commonUtil.uploadFile(file);
+            Optional<FinalQuotation> existingQuotationOptional = finalQuotationRepository.findByFinalQuotationId(quotationId);
+            if (existingQuotationOptional.isEmpty()) {
+                log.info("Final Quotation with quotationId {} not found", quotationId);
+                throw new IllegalArgumentException("Final Quotation with quotationId " + quotationId + " not found");
+            }
+            FinalQuotation existingQuotation = existingQuotationOptional.get();
+            existingQuotation.setImageUrl(url);
+            finalQuotationRepository.save(existingQuotation);
+            return ResponseEntity.ok(url);
+        } catch (Exception e) {
+            log.error("Error uploading final quotations image: {}", e.getMessage(), e);
+            return new ResponseEntity<>(
+                    ServiceResponse.builder()
+                            .message("Error uploading final quotations image")
+                            .build(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> createFinalQuotation(String quotationId) {
+        try {
+            Optional<Quotation> quotation = quotationRepository.findByQuotationId(quotationId);
+            if (quotation.isPresent()) {
+                Quotation qt = quotation.get();
+                if (qt.getQuotationStatus().equalsIgnoreCase("manufacturing complete")) {
+                    List<FinalQuotation> finalQuotationList = qt.getFinalQuotations();
+                    finalQuotationList.add(
+                            FinalQuotation.builder()
+                                    .finalQuotationId(idGeneratorService.generateId())
+                                    .description(qt.getDescription())
+                                    .data(qt.getData())
+                                    .price(qt.getPrice())
+                                    .agentId(qt.getAgentId())
+                                    .clientId(qt.getClientId())
+                                    .quotationStatus("final")
+                                    .imageUrl(qt.getImageUrl())
+                                    .shippingId(qt.getShippingId())
+                                    .trackingId(qt.getTrackingId())
+                                    .build()
+                    );
+                    quotationRepository.save(qt);
+                    return new ResponseEntity<>(ServiceResponse.builder().message("final quote created!").build(), HttpStatus.OK);
+                }
+                return new ResponseEntity<>(ServiceResponse.builder().message("manufacturing not completed").build(), HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>(ServiceResponse.builder().message("quotation not found").build(), HttpStatus.NOT_FOUND);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    public ResponseEntity<?> updateFinalQuotation(UpdateFinalQuotationRequest request) {
+        try {
+            Optional<FinalQuotation> finalQuotation = finalQuotationRepository.findByFinalQuotationId(request.getFinalQuotationId());
+            if (finalQuotation.isPresent()) {
+                FinalQuotation fqt = finalQuotation.get();
+                if (request.getDescription() != null) {
+                    fqt.setDescription(request.getDescription());
+                }
+                if (request.getData() != null) {
+                    fqt.setData(request.getData());
+                }
+                if (request.getPrice() != null) {
+                    fqt.setPrice(request.getPrice());
+                }
+                if (request.getAgentId() != null) {
+                    fqt.setAgentId(request.getAgentId());
+                }
+                if (request.getQuotationStatus() != null) {
+                    fqt.setQuotationStatus(request.getQuotationStatus());
+                }
+                if (request.getTrackingId() != null) {
+                    fqt.setTrackingId(request.getTrackingId());
+                }
+                finalQuotationRepository.save(fqt);
+                return new ResponseEntity<>(ServiceResponse.builder().message("Final Quotation Updated").build(), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(ServiceResponse.builder().message("Final Quotation Update Failed").build(), HttpStatus.BAD_REQUEST);
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage());
         }
     }
 

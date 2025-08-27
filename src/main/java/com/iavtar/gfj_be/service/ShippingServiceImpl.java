@@ -45,6 +45,9 @@ public class ShippingServiceImpl implements ShippingService {
             quotations.forEach(quotation -> quotationRepository.findByQuotationId(quotation)
                     .ifPresent(qt -> {
                         qt.setShippingId(shippingId);
+                        qt.getFinalQuotations().forEach(finalQuotation -> {
+                            finalQuotation.setShippingId(shippingId);
+                        });
                         quotationRepository.save(qt);
                     })
             );
@@ -132,6 +135,7 @@ public class ShippingServiceImpl implements ShippingService {
             List<Quotation> quotations = quotationRepository.findAllByShippingId(shippingId);
             quotations.forEach(quotation -> {
                 quotation.setQuotationStatus("shipped");
+                quotation.setTrackingId(trackingId);
                 quotationRepository.save(quotation);
             });
             log.info("Successfully set tracking ID {} on shipping tracker: {}", trackingId, shippingId);

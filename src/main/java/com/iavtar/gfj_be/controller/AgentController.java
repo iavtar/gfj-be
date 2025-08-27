@@ -3,6 +3,7 @@ package com.iavtar.gfj_be.controller;
 import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.model.request.ClientRequest;
+import com.iavtar.gfj_be.model.request.UpdateFinalQuotationRequest;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.QuotationCreationResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
@@ -79,7 +80,7 @@ public class AgentController {
 
     @GetMapping("/clients")
     public ResponseEntity<?> getMyClients(@RequestParam("agentId") Long agentId, @RequestParam(defaultValue = "0") int offset,
-            @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sortBy) {
+                                          @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sortBy) {
         try {
             log.info("Getting clients for agent: {} with pagination: offset={}, size={}, sortBy={}", agentId, offset, size, sortBy);
             PagedUserResponse<Client> response = agentService.getClientsByAgent(agentId, offset, size, sortBy);
@@ -137,6 +138,33 @@ public class AgentController {
             log.info("Quotation updated successfully with ID: {}", updateQuotation.getId());
             ServiceResponse response = ServiceResponse.builder().message("Quotation updated successfully").build();
             return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error updating quotation: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error updating quotation").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/createFinalQuotation")
+    public ResponseEntity<?> createFinalQuotation(@RequestParam("quotationId") String quotationId) {
+        try {
+            log.info("Creating final quotation for quotation: {}", quotationId);
+            ResponseEntity<?> response = quotationService.createFinalQuotation(quotationId);
+            log.info("Created final quotation created for quotation with ID: {}", quotationId);
+            return response;
+        } catch (Exception e) {
+            log.error("Error creating quotation: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error creating final quotation").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/updateFinalQuotation")
+    public ResponseEntity<?> updateFinalQuotation(@RequestBody UpdateFinalQuotationRequest request) {
+        try {
+            log.info("Updating final quotation with ID: {}", request.getFinalQuotationId());
+            log.info("final quotation updated successfully with ID: {}", request.getFinalQuotationId());
+            return quotationService.updateFinalQuotation(request);
         } catch (Exception e) {
             log.error("Error updating quotation: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error updating quotation").build();
@@ -232,9 +260,23 @@ public class AgentController {
     }
 
     @PostMapping("/quotation/upload")
-    public ResponseEntity<?> uploadQuotationImage(@RequestParam("file") MultipartFile file, @RequestParam("quotationId") String quotationId) {
+    public ResponseEntity<?> uploadQuotationImage(@RequestParam("file") MultipartFile file,
+                                                  @RequestParam("quotationId") String quotationId) {
         try {
             return quotationService.uploadQuotationImage(file, quotationId);
+        } catch (Exception e) {
+            log.error("Error uploading quotations image: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder().message("Error uploading quotations image").build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+
+    }
+
+    @PostMapping("/finalQuotation/upload")
+    public ResponseEntity<?> uploadFinalQuotationImage(@RequestParam("file") MultipartFile file,
+                                                       @RequestParam("quotationId") String quotationId) {
+        try {
+            return quotationService.uploadFinalQuotationImage(file, quotationId);
         } catch (Exception e) {
             log.error("Error uploading quotations image: {}", e.getMessage(), e);
             ServiceResponse errorResponse = ServiceResponse.builder().message("Error uploading quotations image").build();
