@@ -69,7 +69,7 @@ public class QuotationService {
         if (quotation.getQuotationStatus() != null) {
             existingQuotation.setQuotationStatus(quotation.getQuotationStatus());
         }
-        if(quotation.getDescription() != null) {
+        if (quotation.getDescription() != null) {
             existingQuotation.setDescription(quotation.getDescription());
         }
         existingQuotation.setUpdatedAt(LocalDateTime.now());
@@ -187,7 +187,7 @@ public class QuotationService {
                                     .clientId(qt.getClientId())
                                     .quotationStatus("final")
                                     .imageUrl(qt.getImageUrl())
-                                    .shippingId(qt.getQuotationId())
+                                    .shippingId(qt.getShippingId())
                                     .trackingId(qt.getTrackingId())
                                     .build()
                     );
@@ -207,12 +207,24 @@ public class QuotationService {
             Optional<FinalQuotation> finalQuotation = finalQuotationRepository.findByFinalQuotationId(request.getFinalQuotationId());
             if (finalQuotation.isPresent()) {
                 FinalQuotation fqt = finalQuotation.get();
-                fqt.setDescription(request.getDescription());
-                fqt.setData(request.getData());
-                fqt.setPrice(request.getPrice());
-                fqt.setAgentId(request.getAgentId());
-                fqt.setQuotationStatus(request.getQuotationStatus());
-                fqt.setTrackingId(request.getTrackingId());
+                if (request.getDescription() != null) {
+                    fqt.setDescription(request.getDescription());
+                }
+                if (request.getData() != null) {
+                    fqt.setData(request.getData());
+                }
+                if (request.getPrice() != null) {
+                    fqt.setPrice(request.getPrice());
+                }
+                if (request.getAgentId() != null) {
+                    fqt.setAgentId(request.getAgentId());
+                }
+                if (request.getQuotationStatus() != null) {
+                    fqt.setQuotationStatus(request.getQuotationStatus());
+                }
+                if (request.getTrackingId() != null) {
+                    fqt.setTrackingId(request.getTrackingId());
+                }
                 finalQuotationRepository.save(fqt);
                 return new ResponseEntity<>(ServiceResponse.builder().message("Final Quotation Updated").build(), HttpStatus.OK);
             }
