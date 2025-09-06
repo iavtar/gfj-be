@@ -18,6 +18,7 @@ public class DashboardTab {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private DashboardTabs name;
 
     @Override

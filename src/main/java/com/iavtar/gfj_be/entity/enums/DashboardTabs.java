@@ -14,7 +14,8 @@ public enum DashboardTabs {
     LEDGER("ledger"),
     SHIPPING("shipping"),
     ANALYTICS("analytics"),
-    QUOTATION("quotation");
+    QUOTATION("quotation"),
+    CHAT("chat");
 
     private final String value;
 

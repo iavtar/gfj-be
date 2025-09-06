@@ -80,13 +80,13 @@ public class CommonUtil {
     }
 
     public Set<DashboardTab> getDashboardTabsForAgent() {
-        List<DashboardTabs> requiredTabs = Arrays.asList(DashboardTabs.CLIENT_ADMINISTRATION, DashboardTabs.CALCULATOR, DashboardTabs.QUOTATION);
+        List<DashboardTabs> requiredTabs = Arrays.asList(DashboardTabs.CLIENT_ADMINISTRATION, DashboardTabs.CALCULATOR, DashboardTabs.QUOTATION, DashboardTabs.CHAT);
         return getDashboardTabs(requiredTabs, "agent");
     }
 
     public Set<DashboardTab> getDashboardTabsForBusinessAdmin() {
         List<DashboardTabs> requiredTabs = Arrays.asList(DashboardTabs.AGENT_ADMINISTRATION, DashboardTabs.CLIENT_ADMINISTRATION,
-                DashboardTabs.CALCULATOR, DashboardTabs.LEDGER, DashboardTabs.SHIPPING, DashboardTabs.ANALYTICS, DashboardTabs.QUOTATION);
+                DashboardTabs.CALCULATOR, DashboardTabs.LEDGER, DashboardTabs.SHIPPING, DashboardTabs.ANALYTICS, DashboardTabs.QUOTATION, DashboardTabs.CHAT);
         return getDashboardTabs(requiredTabs, "business admin");
     }
 
