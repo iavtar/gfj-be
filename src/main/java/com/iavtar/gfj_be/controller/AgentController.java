@@ -3,6 +3,7 @@ package com.iavtar.gfj_be.controller;
 import com.iavtar.gfj_be.entity.Client;
 import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.model.request.ClientRequest;
+import com.iavtar.gfj_be.model.request.QuotationSearchRequest;
 import com.iavtar.gfj_be.model.request.UpdateFinalQuotationRequest;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.QuotationCreationResponse;
@@ -11,10 +12,14 @@ import com.iavtar.gfj_be.service.AgentService;
 import com.iavtar.gfj_be.service.QuotationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -283,6 +288,88 @@ public class AgentController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
 
+    }
+
+    @PostMapping("/searchQuotations")
+    public ResponseEntity<?> searchQuotations(@RequestBody QuotationSearchRequest searchRequest) {
+        try {
+            log.info("Searching quotations with criteria: {}", searchRequest);
+            PagedUserResponse<Quotation> quotations = quotationService.searchQuotations(searchRequest);
+            return ResponseEntity.ok(quotations);
+        } catch (Exception e) {
+            log.error("Error searching quotations: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error searching quotations: " + e.getMessage())
+                    .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/searchQuotationsByText")
+    public ResponseEntity<?> searchQuotationsByText(@RequestBody QuotationSearchRequest searchRequest) {
+        try {
+            log.info("Searching quotations by text: {}", searchRequest.getSearchText());
+            PagedUserResponse<Quotation> quotations = quotationService.searchQuotationsByText(searchRequest);
+            return ResponseEntity.ok(quotations);
+        } catch (Exception e) {
+            log.error("Error searching quotations by text: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error searching quotations by text: " + e.getMessage())
+                    .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @GetMapping("/searchQuotations")
+    public ResponseEntity<?> searchQuotationsWithParams(
+            @RequestParam(required = false) String quotationId,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Long agentId,
+            @RequestParam(required = false) Long clientId,
+            @RequestParam(required = false) String quotationStatus,
+            @RequestParam(required = false) String shippingId,
+            @RequestParam(required = false) String trackingId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAfter,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdBefore,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime updatedAfter,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime updatedBefore,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+        try {
+            log.info("Searching quotations with query parameters");
+            QuotationSearchRequest searchRequest = QuotationSearchRequest.builder()
+                    .quotationId(quotationId)
+                    .description(description)
+                    .minPrice(minPrice)
+                    .maxPrice(maxPrice)
+                    .agentId(agentId)
+                    .clientId(clientId)
+                    .quotationStatus(quotationStatus)
+                    .shippingId(shippingId)
+                    .trackingId(trackingId)
+                    .createdAfter(createdAfter)
+                    .createdBefore(createdBefore)
+                    .updatedAfter(updatedAfter)
+                    .updatedBefore(updatedBefore)
+                    .offset(offset)
+                    .size(size)
+                    .sortBy(sortBy)
+                    .sortDirection(sortDirection)
+                    .build();
+            
+            PagedUserResponse<Quotation> quotations = quotationService.searchQuotations(searchRequest);
+            return ResponseEntity.ok(quotations);
+        } catch (Exception e) {
+            log.error("Error searching quotations with query parameters: {}", e.getMessage(), e);
+            ServiceResponse errorResponse = ServiceResponse.builder()
+                    .message("Error searching quotations: " + e.getMessage())
+                    .build();
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
     }
 
 }

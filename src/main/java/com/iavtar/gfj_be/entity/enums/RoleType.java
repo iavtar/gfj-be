@@ -9,7 +9,9 @@ public enum RoleType {
 
     SUPER_ADMIN("super_admin"),
     BUSINESS_ADMIN("business_admin"),
-    AGENT("agent");
+    AGENT("agent"),
+    SHIPPER("shipper"),
+    ACCOUNTANT("accountant");
 
     private String value;
 

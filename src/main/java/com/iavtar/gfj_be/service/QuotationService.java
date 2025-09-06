@@ -2,6 +2,7 @@ package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.FinalQuotation;
 import com.iavtar.gfj_be.entity.Quotation;
+import com.iavtar.gfj_be.model.request.QuotationSearchRequest;
 import com.iavtar.gfj_be.model.request.UpdateFinalQuotationRequest;
 import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
@@ -10,6 +11,10 @@ import com.iavtar.gfj_be.repository.QuotationRepository;
 import com.iavtar.gfj_be.utility.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -234,4 +239,53 @@ public class QuotationService {
         }
     }
 
+    public PagedUserResponse<Quotation> searchQuotations(QuotationSearchRequest searchRequest) {
+        log.info("Searching quotations with criteria: {}", searchRequest);
+        
+        int page = searchRequest.getOffset() / searchRequest.getSize();
+        Sort.Direction direction = "desc".equalsIgnoreCase(searchRequest.getSortDirection()) 
+            ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, searchRequest.getSortBy());
+        Pageable pageable = PageRequest.of(page, searchRequest.getSize(), sort);
+        
+        Page<Quotation> quotationPage = quotationRepository.searchQuotations(
+            searchRequest.getQuotationId(),
+            searchRequest.getDescription(),
+            searchRequest.getMinPrice(),
+            searchRequest.getMaxPrice(),
+            searchRequest.getAgentId(),
+            searchRequest.getClientId(),
+            searchRequest.getQuotationStatus(),
+            searchRequest.getShippingId(),
+            searchRequest.getTrackingId(),
+            searchRequest.getCreatedAfter(),
+            searchRequest.getCreatedBefore(),
+            searchRequest.getUpdatedAfter(),
+            searchRequest.getUpdatedBefore(),
+            pageable
+        );
+        
+        log.info("Found {} quotations matching search criteria", quotationPage.getNumberOfElements());
+        return PagedUserResponse.from(quotationPage, searchRequest.getOffset(), searchRequest.getSize());
+    }
+
+    public PagedUserResponse<Quotation> searchQuotationsByText(QuotationSearchRequest searchRequest) {
+        log.info("Searching quotations by text: {}", searchRequest.getSearchText());
+        
+        int page = searchRequest.getOffset() / searchRequest.getSize();
+        Sort.Direction direction = "desc".equalsIgnoreCase(searchRequest.getSortDirection()) 
+            ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, searchRequest.getSortBy());
+        Pageable pageable = PageRequest.of(page, searchRequest.getSize(), sort);
+        
+        Page<Quotation> quotationPage = quotationRepository.searchQuotationsByText(
+            searchRequest.getSearchText(),
+            searchRequest.getAgentId(),
+            searchRequest.getClientId(),
+            pageable
+        );
+        
+        log.info("Found {} quotations matching text search", quotationPage.getNumberOfElements());
+        return PagedUserResponse.from(quotationPage, searchRequest.getOffset(), searchRequest.getSize());
+    }
 }
