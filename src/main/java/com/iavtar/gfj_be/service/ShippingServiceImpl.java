@@ -136,6 +136,9 @@ public class ShippingServiceImpl implements ShippingService {
             quotations.forEach(quotation -> {
                 quotation.setQuotationStatus("shipped");
                 quotation.setTrackingId(trackingId);
+                quotation.getFinalQuotations().forEach(finalQuotation -> {
+                    finalQuotation.setTrackingId(trackingId);
+                });
                 quotationRepository.save(quotation);
             });
             log.info("Successfully set tracking ID {} on shipping tracker: {}", trackingId, shippingId);
