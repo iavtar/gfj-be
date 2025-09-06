@@ -2,25 +2,22 @@ package com.iavtar.gfj_be.service;
 
 import com.iavtar.gfj_be.entity.Quotation;
 import com.iavtar.gfj_be.entity.ShippingTracker;
+import com.iavtar.gfj_be.model.request.ShippingSearchRequest;
 import com.iavtar.gfj_be.model.request.UpdateShippingTrackingRequest;
+import com.iavtar.gfj_be.model.response.PagedUserResponse;
 import com.iavtar.gfj_be.model.response.ServiceResponse;
 import com.iavtar.gfj_be.repository.ClientRepository;
 import com.iavtar.gfj_be.repository.QuotationRepository;
 import com.iavtar.gfj_be.repository.ShippingServiceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.iavtar.gfj_be.model.response.PagedUserResponse;
 
 @Slf4j
 @Service
@@ -174,6 +171,50 @@ public class ShippingServiceImpl implements ShippingService {
         } catch (Exception exception) {
             throw new RuntimeException(exception.getMessage());
         }
+    }
+
+    @Override
+    public PagedUserResponse<ShippingTracker> searchShippingTrackers(ShippingSearchRequest searchRequest) {
+        log.info("Searching shipping trackers with criteria: {}", searchRequest);
+        
+        int page = searchRequest.getOffset() / searchRequest.getSize();
+        Sort.Direction direction = "desc".equalsIgnoreCase(searchRequest.getSortDirection()) 
+            ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, searchRequest.getSortBy());
+        Pageable pageable = PageRequest.of(page, searchRequest.getSize(), sort);
+        
+        Page<ShippingTracker> shippingTrackerPage = shippingRepository.searchShippingTrackers(
+            searchRequest.getShippingId(),
+            searchRequest.getTrackingId(),
+            searchRequest.getStatus(),
+            searchRequest.getCreatedAfter(),
+            searchRequest.getCreatedBefore(),
+            searchRequest.getUpdatedAfter(),
+            searchRequest.getUpdatedBefore(),
+            pageable
+        );
+        
+        log.info("Found {} shipping trackers matching search criteria", shippingTrackerPage.getNumberOfElements());
+        return PagedUserResponse.from(shippingTrackerPage, searchRequest.getOffset(), searchRequest.getSize());
+    }
+
+    @Override
+    public PagedUserResponse<ShippingTracker> searchShippingTrackersByText(ShippingSearchRequest searchRequest) {
+        log.info("Searching shipping trackers by text: {}", searchRequest.getSearchText());
+        
+        int page = searchRequest.getOffset() / searchRequest.getSize();
+        Sort.Direction direction = "desc".equalsIgnoreCase(searchRequest.getSortDirection()) 
+            ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, searchRequest.getSortBy());
+        Pageable pageable = PageRequest.of(page, searchRequest.getSize(), sort);
+        
+        Page<ShippingTracker> shippingTrackerPage = shippingRepository.searchShippingTrackersByText(
+            searchRequest.getSearchText(),
+            pageable
+        );
+        
+        log.info("Found {} shipping trackers matching text search criteria", shippingTrackerPage.getNumberOfElements());
+        return PagedUserResponse.from(shippingTrackerPage, searchRequest.getOffset(), searchRequest.getSize());
     }
 
 }
